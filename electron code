@@ -1,0 +1,201 @@
+#include "cellular_hal.h"
+
+//set system mode
+SYSTEM_MODE(SEMI_AUTOMATIC);
+
+//set cellular APN
+STARTUP(cellular_credentials_set("mms", "wap", "wap123", NULL)); //is this necessary? 
+
+//set pins
+int voltage = A0;
+int cur1 = A1;
+int cur2 = A2;
+int cur3 = A3;
+
+//create variables to store measurements
+double i1;
+double i2;
+double i3;
+double v;
+
+//set site data
+String locationCode = "CMK";
+double csdf = 4000; //current sensor downgrading factor 
+unsigned long measurement_frequency = 60*60*1000; //milliseconds
+
+
+long lastPublished ;
+Timer connectTimer(2*60*1000, System.reset);
+
+void setup() {
+    Serial.begin(9600); // for testing
+    
+    //set pin modes
+    pinMode(voltage, INPUT);
+    pinMode(cur1, INPUT);
+    pinMode(cur2, INPUT);
+    pinMode(cur3, INPUT);
+    lastPublished = 0;
+    
+    //turns off cellular module
+    Serial.println("turning off cellular");
+    Cellular.off();
+    Serial.println("delaying 5 sec");
+    delay(5000);
+    
+}
+
+void loop(){
+   
+    if (millis()-lastPublished > measurement_frequency || lastPublished ==0){
+            Serial.println("calling measureAndPublish");
+            measureAndPublish();
+    }
+    
+}
+
+//turns cellular on, attempts to connect to cellular
+//if connected, makes measurement and attempts to publish to cloud
+//if publishes, sets lastPublished to current time
+//if does not connect to cellular, resets system
+void measureAndPublish(){
+    //turn cellular on
+        Serial.println("calling cellular.on");
+        Cellular.on();
+        
+        //set cellular credentials
+        cellular_credentials_set("internet", "", "", NULL);
+        
+        Serial.println("starting timer");
+        connectTimer.start();
+        
+        Serial.println("calling cellular.connect");
+        //attempt connection
+        Cellular.connect();
+        
+        Serial.println("resetting timer");
+        connectTimer.reset();
+        Serial.println("stopping timer");
+        connectTimer.stop();
+        
+               
+
+       Serial.println("starting timer");
+
+       connectTimer.start();
+
+       Serial.println("while loop starting...");
+
+       while(Cellular.connecting()){
+
+           //WHERE ISSUE OCCURED; DIDNT TIME OUT OR CONNECT OR ENTER LISTENING MODE
+
+       }
+
+       Serial.println("resetting timer");
+
+       connectTimer.reset();
+
+       Serial.println("stopping timer");
+
+       connectTimer.stop();
+        
+        if (Cellular.ready()){
+            //once connected make measurement
+            Serial.println("if statement entered; making measurement");
+            measure();
+            Serial.println("post measurement; setting cellular credentials again...");
+            cellular_credentials_set("mms", "wap", "wap123", NULL);
+            //connect to cloud
+            Serial.println("calling particle.connect");
+            Particle.connect();
+            Serial.println("post particle.connect");
+            delay(1*60*1000);
+            if (Particle.connected()){
+                 //publish values
+                Serial.println("if statement entered; publishing to cloud");
+              
+                if (publishToCloud()){
+                     //reset time
+                    lastPublished = millis();
+                }
+                delay(5000);
+            }
+            //disconnect from cloud
+            Serial.println("calling particle.disconnect()");
+            Particle.disconnect();
+        }
+        else {
+            Serial.println("cellular did not connect");
+            Serial.println("resetting system");
+            System.reset();
+        }
+        
+    //disconnects from network
+    Serial.println("calling cellular.disconnect");
+    Cellular.disconnect();
+        
+    //turn cellular off
+    Serial.println("calling cellular.off()");
+    Cellular.off();
+}
+
+bool publishToCloud(){
+        //publish values to cloud
+        Particle.publish(locationCode+"_C1",String::format("%f", i1), 60);
+        delay(1000);
+        Particle.publish(locationCode+"_C2",String::format("%f", i2), 60);
+        delay(1000);
+        Particle.publish(locationCode+"_C3",String::format("%f", i3), 60);
+        delay(1000);
+        bool sent = Particle.publish(locationCode+"_V",String::format("%f", v), 60);
+        delay(5000);
+        return sent;
+}
+
+// makes measurements and stores in i1, i2, i3, and v, sets publish to true
+void measure() {
+        v = maxVoltage(voltage);
+        i1 = findCurrent(cur1);
+        i2  = findCurrent(cur2);
+        i3 = findCurrent(cur3);
+    //String data = String::format("%f,%f,%f,%f", voltageReading, cur1Reading,cur2Reading,cur3Reading);
+
+}
+
+//measures analog input 1000 times and returns maximum voltage found for given pin
+double maxVoltage(int pin){
+    int max = -1;
+    int i=0;
+    int data =-1;
+    while(i<1000){
+        data = analogRead(pin);
+        if (data>max){
+            max = data;
+        }
+    delay(1);
+    i++;
+    }
+    return max*0.0698344;
+}
+
+//measures analog input 1000 times and returns difference between max and min current values
+double findCurrent(int pin){
+    int max = -1;
+    int min = 4096;
+    int data = -1;
+    int i=0;
+    while(i<1000){
+        data = analogRead(pin);
+        if (data>max){
+            max = data ;
+        }
+        if (data<min){
+            min = data;
+        }
+        i++;   
+        delay(1);
+    }
+    
+    return (max-min)*csdf*0.000056983;
+}
