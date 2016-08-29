@@ -197,5 +197,5 @@ double findCurrent(int pin){
         delay(1);
     }
     
-    return (max-min)*csdf*0.000056983;
+    return (max-min)*csdf*0.000056983/2;
 }
