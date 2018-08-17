@@ -96,7 +96,6 @@ void loop(){
                 EEPROM.put(1800, 0xFF);
             }
         }
-        
     }
     if (millis()-lastPublished > publish_frequency) {
         Serial.println("publishing\n\n\n");
@@ -203,10 +202,12 @@ bool publishToCloud(){
         String on(stringBuf);
         total += on;
     }
-    sent = Particle.publish("DATA",total, 60);
-    if (sent) {
-        EEPROM.put(1800, 0xFF);
-        EEPROM.put(1900, 0xFF);
+    if (total != "") {
+        sent = Particle.publish("DATA",total, 60);
+        if (sent) {
+            EEPROM.put(1800, 0xFF);
+            EEPROM.put(1900, 0xFF);
+        }
     }
     return true;
 }
