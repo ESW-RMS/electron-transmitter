@@ -245,7 +245,7 @@ double Sensors::waveError(int measurementIndex, int iterator, int xShift, int am
 }
 
 double Sensors::simulateWave(int yShift, int xShift, int amplitude, int iterator, int period) {
-    return ((double)yShift + ((double)amplitude/(double)100) * fabs(cos( 2.0 * pi *  (((double)xShift + (double)iterator*measurementDuration) / (double)period))));
+    return ((double)yShift + ((double)amplitude/(double)100) * fabs(cos( 2.0 * pi *  ((double)xShift + ((double)iterator*measurementDuration) / (double)period))));
 }
 
 void Sensors::recordSamples() {
@@ -362,7 +362,8 @@ void Sensors::bruteforceFrequencies(int measurementIndex/* = -1*/) {
 
         int sampleCap = measurement_samples;
 
-        for(int periodRound = 0; periodRound < 4; periodRound++) {
+        for(int periodRound = 0; periodRound < 3; periodRound++) {
+            Serial.println(String::format("PERIOD ROUND %d ---------------------------------------------", periodRound));
             if(periodRound == 1) {
                 sampleCap = period / measurementDuration;
             } else if(periodRound == 2) {
@@ -379,7 +380,7 @@ void Sensors::bruteforceFrequencies(int measurementIndex/* = -1*/) {
 
             while(!foundPeriod || !foundxShift) {
                 // Recalculate period
-                if(index == 0 && periodRound != 2) {
+                if(index == 0 && periodRound != 1) {
                     iterator = (periodMax-periodMin) / regression_n;
                     if(iterator < 1) {
                         foundPeriod = true;
@@ -416,8 +417,8 @@ void Sensors::bruteforceFrequencies(int measurementIndex/* = -1*/) {
                 } else {
                     foundPeriod = true;
                 }
-                if(periodRound != 1) {
-                    // Recalculate xShift --> This assumes we know the period is ~20000
+                if(periodRound != 2) {
+                    // Recalculate xShift
                     iterator = (xShiftMax-xShiftMin) / regression_n;
                     if(iterator < 1) {
                         foundxShift = true;

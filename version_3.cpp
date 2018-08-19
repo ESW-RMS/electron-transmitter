@@ -1,4 +1,14 @@
-// Site-specific code for Cinta Mekar
+/*
+
+  Stanford Engineers for a Sustainable World
+  Remote Monitoring System | August 2018
+  Michael Lin | mlin4@stanford.edu
+
+  File: version_3.cpp
+  --------------------------
+  Main electron code
+
+*/
 
 #include "cellular_hal.h"
 #include <math.h>
