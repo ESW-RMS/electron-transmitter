@@ -71,7 +71,7 @@ void setup() {
 }
 
 void loop(){
-    //Sensorboard.fieldTest();
+    Sensorboard.fieldTest();
     if (Time.format("%y").toInt() < 18 || Time.format("%y").toInt() > 70) {
         syncTime();
     } 

@@ -40,7 +40,7 @@ public:
 private:
 /*********************************  HELPERS  **********************************/
 
-  double 	simulateWave(int yShift, int xShift, int amplitude, int iterator, int period);
+  double 	simulateWave(int yShift, bool rectified, int xShift, int amplitude, int iterator, int period);
 	double 	waveError(int measurementIndex, int iterator, int xShift, int amplitude, int period);
 	void	 	recordSamples();
 	void 		analyzeSmoothedWaves(int measurementIndex = -1);
@@ -83,6 +83,7 @@ private:
   	int 					waveMin;
   	int 					waveMax;
   	double 				error;
+    bool          rectified;
 };
 
 	unsigned short 	voltage;
