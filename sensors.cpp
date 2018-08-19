@@ -203,7 +203,7 @@ void Sensors::refreshAll() {
     }
 }
 
-void Sensors::refreshState() {
+void Sensors::refreshStatus() {
     for(unsigned int i = 0; i < status_samples; i++) {
         samples[0][i] = analogRead(input[0].pin);
     }
@@ -214,6 +214,30 @@ void Sensors::fieldTest() {
   while(true) {
     refreshAll();
   }
+}
+
+bool Sensors::getGeneratorStatus() {
+  return inputActive;
+}
+
+unsigned short Sensors::getVoltage() {
+  return voltage;
+}
+
+unsigned short Sensors::getFrequency() {
+  return frequency;
+}
+
+unsigned short Sensors::getCurrent_1() {
+  return current_1;
+}
+
+unsigned short Sensors::getCurrent_2() {
+  return current_2;
+}
+
+unsigned short Sensors::getCurrent_3() {
+  return current_3;
 }
 
 double Sensors::waveError(int measurementIndex, int iterator, int xShift, int amplitude, int period) {

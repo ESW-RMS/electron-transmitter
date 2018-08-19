@@ -3,6 +3,7 @@
 #include "cellular_hal.h"
 #include <math.h>
 #include "application.h"
+#include "sensors.h"
 
 //set system mode
 SYSTEM_MODE(SEMI_AUTOMATIC);
@@ -10,29 +11,8 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 //set cellular APN
 //STARTUP(cellular_credentials_set("internet", "wap", "wap123", NULL)); 
 
-//set pins
-int voltage = A0;
-int cur1 = A1;
-int cur2 = A2;
-int cur3 = A3;
+Sensors Sensorboard;
 
-//create variables to store measurements
-unsigned short i1;
-unsigned short i2;
-unsigned short i3;
-unsigned short v;
-unsigned short freq;
-
-double conversion_with_battery = 0.0008203445; // <-- old offset 0.00385561915
-double conversion_without_battery = 0.0008025682181; //0.003772070625 <-- old offset
-double i1_offset = 2044.568;
-double i2_offset = 2047.938;
-double i3_offset = 2046.561;
-double i1o_no_battery = 1977.921;
-double i2o_no_battery = 1980.809;
-double i3o_no_battery = 1979.482;
-
-double off_threshold = 20.0;
 
 //set site data
 String locationCode = "SUM";
@@ -47,7 +27,6 @@ unsigned char offline;
 long lastPublished;
 long lastMeasured;
 long lastStatus;
-bool inputActive;
 
 void resetElectron() {
     System.reset();
@@ -59,23 +38,14 @@ void syncTime();
 void putInEEPROM(String message, int address);
 void publish(bool regular);
 bool publishToCloud();
-void checkStatus();
 void storeMeasurements();
-void measure();
 void publishStatus();
-double test_voltage_rms(int pin);
-double voltage_on_current(int cur);
-double current_RMS(int cur);
-double frequency(int vpin);
 
 void setup() {
     Serial.begin(9600); // for testing
     
-    //set pin modes
-    pinMode(voltage, INPUT);
-    pinMode(cur1, INPUT);
-    pinMode(cur2, INPUT);
-    pinMode(cur3, INPUT);
+    Sensorboard.init();
+
     lastPublished = 0;
     lastMeasured = 0;
     lastStatus = 0;
@@ -91,15 +61,16 @@ void setup() {
 }
 
 void loop(){
+    //Sensorboard.fieldTest();
     if (Time.format("%y").toInt() < 18 || Time.format("%y").toInt() > 70) {
         syncTime();
     } 
     if (millis()-lastStatus > status_frequency) {
         Serial.println("checking status");
-        checkStatus();
+        Sensorboard.refreshStatus();
         lastStatus = millis();
         if (offline == 'y') {
-            if (inputActive) {
+            if (Sensorboard.getGeneratorStatus()) {
                 putInEEPROM("on,", 1900);
                 offline = 'n';
                 EEPROM.put(2030, offline);
@@ -107,7 +78,7 @@ void loop(){
                 EEPROM.put(1900, 0xFF);
             }
         } else {
-            if (!inputActive) {
+            if (!Sensorboard.getGeneratorStatus()) {
                 putInEEPROM("off,", 1800);
                 offline = 'y';
                 EEPROM.put(2030, offline);
@@ -118,7 +89,7 @@ void loop(){
     }
     if (millis() - lastMeasured > measurement_frequency) {
         Serial.println("measuring\n\n\n");
-        measure();
+        Sensorboard.refreshAll();
         storeMeasurements();
     }
     if (((millis()-lastPublished > publish_frequency) && offline != 'y') || publishedAll == 'n') {
@@ -173,11 +144,11 @@ void storeMeasurements() { //EEPROM
         value = 0;
     }
     int address = value * 10 + 1;
-    EEPROM.put(address,i1);
-    EEPROM.put(address+2,i2);
-    EEPROM.put(address+4,i3);
-    EEPROM.put(address+6,freq);
-    EEPROM.put(address+8,v);
+    EEPROM.put(address,Sensorboard.getCurrent_1());
+    EEPROM.put(address+2,Sensorboard.getCurrent_2());
+    EEPROM.put(address+4,Sensorboard.getCurrent_3());
+    EEPROM.put(address+6,Sensorboard.getFrequency());
+    EEPROM.put(address+8,Sensorboard.getVoltage());
     value++;
     EEPROM.put(0, value);
     if (num < 168) {
@@ -188,16 +159,6 @@ void storeMeasurements() { //EEPROM
         EEPROM.put(2020, value);
     }
     Serial.println("finished storing measurements\n\n\n");
-}
-
-// makes measurements and stores in i1, i2, i3, and v
-void measure() {
-    v = (unsigned short) (test_voltage_rms(voltage)*100);
-    i1 = (unsigned short) (current_RMS(cur1)*100);
-    i2  = (unsigned short) (current_RMS(cur2)*100);
-    i3 = (unsigned short) (current_RMS(cur3)*100);
-    freq = (unsigned short) (frequency(voltage)*100);
-    lastMeasured = millis();
 }
 
 //turns cellular on, attempts to connect to cellular
@@ -294,6 +255,11 @@ bool publishToCloud(){
     
     while (value > 0) {
         int address = value * 10 - 1; 
+        unsigned short v;
+        unsigned short freq;
+        unsigned short i1;
+        unsigned short i2;
+        unsigned short i3;
         EEPROM.get(address, v);
         EEPROM.get(address - 2, freq);
         EEPROM.get(address - 4, i3);
@@ -354,87 +320,4 @@ bool publishToCloud(){
     EEPROM.clear();
     publishedAll = 'y';
     return true;
-}
-
-//measures RMS of voltage pin by taking 1000 samples and computing discrete time RMS of the data
-double test_voltage_rms(int pin){
-    double sum = 0.0;
-    for (int i=0; i<1000; i++){
-        double vtemp = analogRead(pin);
-        sum+=(vtemp*vtemp);
-        delay(1);
-    }
-    //found sum of squares of 1000 measurements, 50 periods
-    return sqrt(2.0*sum/1000.0)*(conversion_with_battery)*(576.0/4.7);
-    //calculated voltage by accounting for voltage divider, Electron measuremnt protocol and taking the rms via sqrting the sum
-}
-
-double voltage_on_current(int cur){
-    double offset = 0.0;
-    if (cur == cur1) offset = i1o_no_battery;
-    if (cur == cur2) offset = i2o_no_battery;
-    if (cur == cur3) offset = i3o_no_battery;
-    double I_bin = analogRead(cur);
-    //Serial.print(I_bin);
-    //Serial.print("     ");
-    double v_measured = (I_bin-offset)*conversion_without_battery;
-    double i = (v_measured)*85.11; //4000.0/47.0;
-    //Serial.println(i);
-    return i;
-}
-
-//computes the RMS of the current waveform by sampling 1000 times and taking discrete time RMS of data
-double current_RMS(int cur){
-    double i_sum = 0.0;
-    double current_cur = 0.0;
-    for(int i = 0; i < 1000; i++){
-        current_cur = voltage_on_current(cur);
-        i_sum = i_sum + current_cur*current_cur;
-    }
-    double i_rms = sqrt(i_sum/1000.0);
-    //Serial.println(i_rms);
-    delay(1000);
-    return i_rms;
-}
-
-double frequency(int vpin){
-    //Serial.println("in frequency");
-    int count = 0;
-    bool check = false;
-    bool ran = false;
-    double threshold = 20; // NEED TO DETERMINE A THRESHOLD
-    double v1 = 0;
-    int t1 = 0;
-    int t2 = 0;
-    
-    while(t1 < 5000){   //stay in loop for 5 seconds, check voltage and see if below threshold
-        //Serial.print("in 1st loop: ");
-        //Serial.println(t1);
-        v1 = analogRead(vpin);
-        //Serial.println(v1);
-        if (v1 > threshold) check = true;
-        while (check == true && v1 < threshold && t2 < 5000) {  //once crossed threshold, initiate counter. stay for a max of 5 seconds
-            ran = true;
-            count++;
-            t2++;
-            v1 = analogRead(vpin);
-            delayMicroseconds(1);
-            //Serial.print("in 2nd loop: ");
-            //Serial.print("Tlow = ");
-            //Serial.print(t2);
-            //Serial.print("  Voltage = ");
-            //Serial.println(v1);
-        }
-        if (ran) break;
-        delayMicroseconds(1);
-        t1++;
-    }
-    if(t1 > 4999) return 0; //if an invalid measurement return 0
-    double f = 1.0/count/2.0/0.00009208103; //This is the equation for frequency... 1/F where count is the number of samples 
-                                        //found in the down half wave and the .000555 constant was found experimentally. 
-                                        //Kinda janky but due to delays of functionality it won't delay for an exact enough time
-    //Serial.print(count);
-    //Serial.print("  ");
-    //Serial.println(f);
-    return f;
 }

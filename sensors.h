@@ -26,9 +26,16 @@ public:
 
 /********************************  FUNCTIONS  *********************************/
   void		init();
-  void    refreshState();
+  void    refreshStatus();
   void    refreshAll();
   void    fieldTest();
+  bool    getGeneratorStatus();
+  unsigned short    getVoltage();
+  unsigned short    getFrequency();
+  unsigned short    getCurrent_1();
+  unsigned short    getCurrent_2();
+  unsigned short    getCurrent_3();
+  
 
 private:
 /*********************************  HELPERS  **********************************/
