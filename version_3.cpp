@@ -15,7 +15,12 @@
 #include "application.h"
 #include "sensors.h"
 
+//for version 3, define status_change and measure
+//for version 2, define measure
+//for failsafe, define status_change
+
 #define STATUS_CHANGE
+#define MEASURE
 
 //set system mode
 SYSTEM_MODE(SEMI_AUTOMATIC);
@@ -73,7 +78,7 @@ void loop(){
     if (Time.format("%y").toInt() < 18 || Time.format("%y").toInt() > 70) {
         syncTime();
     } 
-    #ifndef STATUS_CHANGE
+    #ifdef STATUS_CHANGE
     if (millis()-lastStatus > status_frequency) {
         Serial.println("checking status");
         Sensorboard.refreshStatus();
@@ -97,11 +102,13 @@ void loop(){
         }
     }
     #endif
+    #ifdef MEASURE
     if (millis() - lastMeasured > measurement_frequency) {
         Serial.println("measuring\n\n\n");
         Sensorboard.refreshAll();
         storeMeasurements();
     }
+    #endif
     if ((millis()-lastPublished > publish_frequency) || publishedAll == 'n') {
         Serial.println("publishing\n\n\n");
         publish(true);
@@ -197,6 +204,11 @@ void publish(bool regular) { //if regular, measure publish, if !regular, status 
             Serial.println("particle connected, trying to publish to cloud");
             if (regular == false) {
                 publishStatus();
+                #ifdef STATUS_CHANGE
+                #ifndef MEASURE
+                lastPublished = millis();
+                #endif
+                #endif
             } else if (publishToCloud()){
                 Serial.println("publish worked");
                 lastPublished = lastMeasured;
@@ -249,7 +261,7 @@ bool publishToCloud(){
     bool include_time = true;
     int counter = 0;
     
-    #ifndef STATUS_CHANGE
+    #ifdef STATUS_CHANGE
     publishStatus();
     #endif
 
