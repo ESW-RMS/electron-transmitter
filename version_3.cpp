@@ -32,8 +32,6 @@ double i1o_no_battery = 1977.921;
 double i2o_no_battery = 1980.809;
 double i3o_no_battery = 1979.482;
 
-double off_threshold = 20.0;
-
 //set site data
 String locationCode = "SUM";
 double csdf = 4000; //current sensor downgrading factor 
@@ -121,7 +119,7 @@ void loop(){
         measure();
         storeMeasurements();
     }
-    if (((millis()-lastPublished > publish_frequency) && offline != 'y') || publishedAll == 'n') {
+    if ((millis()-lastPublished > publish_frequency) || publishedAll == 'n') {
         Serial.println("publishing\n\n\n");
         publish(true);
     }
