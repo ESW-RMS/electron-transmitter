@@ -23,7 +23,6 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 
 Sensors Sensorboard;
 
-
 //set site data
 String locationCode = "SUM";
 double csdf = 4000; //current sensor downgrading factor 
@@ -102,7 +101,7 @@ void loop(){
         Sensorboard.refreshAll();
         storeMeasurements();
     }
-    if (((millis()-lastPublished > publish_frequency) && offline != 'y') || publishedAll == 'n') {
+    if ((millis()-lastPublished > publish_frequency) || publishedAll == 'n') {
         Serial.println("publishing\n\n\n");
         publish(true);
     }

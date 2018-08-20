@@ -46,6 +46,7 @@ private:
 	void 		analyzeSmoothedWaves(int measurementIndex = -1);
 	void 		bruteforceFrequencies(int measurementIndex = -1);
 	void 		bruteforceAmplitudes(int measurementIndex = -1);
+  void    calculatePower();
 	bool 		checkStatus();
 	void 		setOutputs(int mode);
 	#ifdef DEBUG1
@@ -91,6 +92,11 @@ private:
 	unsigned short 	current_1;
 	unsigned short 	current_2;
 	unsigned short 	current_3;
+  unsigned short totalPower;
+
+  double  power_1;
+  double  power_2;
+  double  power_3;
 
 	static constexpr double 	pi = 3.1415926535; // pi
 	static const unsigned int measurement_samples = 2000; // Number of samples to take .73 seconds worth of data

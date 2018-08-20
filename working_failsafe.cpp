@@ -2,6 +2,7 @@
 
 #include "cellular_hal.h"
 #include <math.h>
+#include "application.h"
 
 //set system mode
 SYSTEM_MODE(SEMI_AUTOMATIC);
@@ -19,7 +20,7 @@ int cur3 = A3;
 unsigned short current_1;
 unsigned short current_2;
 unsigned short current_3;
-unsigned short voltage;
+unsigned short v;
 unsigned short freq;
 
 double conversion_with_battery = 0.0008203445; // <-- old offset 0.00385561915
@@ -45,11 +46,18 @@ long lastPublished;
 long lastStatus;
 bool inputActive;
 
-Timer connectTimer(3*60*1000, resetElectron);
-
 void resetElectron() {
     System.reset();
 }
+
+Timer connectTimer(3*60*1000, resetElectron);
+
+void syncTime();
+void putInEEPROM(String message, int address);
+void publish();
+bool publishToCloud();
+void checkStatus();
+
 
 void setup() {
     Serial.begin(9600); // for testing
@@ -70,6 +78,7 @@ void setup() {
     delay(5000);
     
 }
+
 
 void loop(){
     if (Time.format("%y").toInt() < 18 || Time.format("%y").toInt() > 70) {
@@ -102,6 +111,8 @@ void loop(){
         publish();
     }
 }
+
+void checkStatus(){}
 
 void syncTime() {
     cellular_credentials_set("internet", "wap", "wap123", NULL);
@@ -182,9 +193,7 @@ void publish() {
 
 bool publishToCloud(){
     bool sent;
-    bool include_time = true;
-    int counter = 0;
-    
+
     unsigned char stopped;
     EEPROM.get(1800, stopped);
     unsigned char started;
@@ -208,6 +217,8 @@ bool publishToCloud(){
             EEPROM.put(1800, 0xFF);
             EEPROM.put(1900, 0xFF);
         }
+    } else {
+        sent = Particle.publish("DATA", "connected", 60);
     }
     return true;
 }

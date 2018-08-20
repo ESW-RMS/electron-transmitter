@@ -141,6 +141,10 @@ void Sensors::refreshAll() {
             #ifdef DEBUG1
       Serial.println("Wave analysis complete");
             #endif
+      //calculatePower();
+      #ifdef DEBUG1
+      //Serial.println("Power calculations complete");
+            #endif
     } else {
             setOutputs(0); // Set currents to 0 if generator is off
           }
@@ -569,6 +573,15 @@ bool Sensors::checkStatus() {
     }
   }
   return false;
+}
+
+void Sensors::calculatePower() {
+  /*double angle1;
+  double angle2;
+  double angle3;*/
+
+  // TODO 8000 2000 --> 
+
 }
 
 void Sensors::setOutputs(int mode) {
