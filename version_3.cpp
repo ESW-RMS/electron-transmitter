@@ -73,6 +73,7 @@ void loop(){
     if (Time.format("%y").toInt() < 18 || Time.format("%y").toInt() > 70) {
         syncTime();
     } 
+    #ifndef STATUS_CHANGE
     if (millis()-lastStatus > status_frequency) {
         Serial.println("checking status");
         Sensorboard.refreshStatus();
@@ -95,6 +96,7 @@ void loop(){
             }
         }
     }
+    #endif
     if (millis() - lastMeasured > measurement_frequency) {
         Serial.println("measuring\n\n\n");
         Sensorboard.refreshAll();
@@ -247,7 +249,9 @@ bool publishToCloud(){
     bool include_time = true;
     int counter = 0;
     
+    #ifndef STATUS_CHANGE
     publishStatus();
+    #endif
 
     uint8_t value;
     EEPROM.get(0, value);
