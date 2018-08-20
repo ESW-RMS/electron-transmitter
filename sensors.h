@@ -14,7 +14,7 @@
 #define SENSORS_H
 
 #define DEBUG1 // Verbose
-//#define DEBUG2 // Prints final output
+#define DEBUG2 // Prints final output
 #define DEBUG3 // Generates random sample data
 #define DEBUG4 // Super verbose
 //#define DEBUG5 // Prints regression
@@ -46,7 +46,7 @@ private:
 	void 		analyzeSmoothedWaves(int measurementIndex = -1);
 	void 		bruteforceFrequencies(int measurementIndex = -1);
 	void 		bruteforceAmplitudes(int measurementIndex = -1);
-  void    calculatePower();
+  void    calculatePower(int current);
 	bool 		checkStatus();
 	void 		setOutputs(int mode);
 	#ifdef DEBUG1

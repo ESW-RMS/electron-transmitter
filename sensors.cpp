@@ -27,7 +27,7 @@ void Sensors::init() {
   input[0].periodMin = 15000;
   input[0].periodMax = 25000;
   input[0].xShiftMin = 0;
-  input[0].xShiftMax = 12500;
+  input[0].xShiftMax = 10000;
   input[0].amplitudeMin = 1;
   input[0].amplitudeMax = 409500;
   input[0].yShift = -330;
@@ -48,7 +48,7 @@ void Sensors::init() {
   input[1].periodMin = 15000;
   input[1].periodMax = 25000;
   input[1].xShiftMin = 0;
-  input[1].xShiftMax = 12500;
+  input[1].xShiftMax = 10000;
   input[1].amplitudeMin = 1;
   input[1].amplitudeMax = 409500;
   input[1].yShift = 1975;
@@ -69,7 +69,7 @@ void Sensors::init() {
   input[2].periodMin = 15000;
   input[2].periodMax = 25000;
   input[2].xShiftMin = 0;
-  input[2].xShiftMax = 12500;
+  input[2].xShiftMax = 10000;
   input[2].amplitudeMin = 1;
   input[2].amplitudeMax = 409500;
   input[2].yShift = 2400;
@@ -90,7 +90,7 @@ void Sensors::init() {
   input[3].periodMin = 15000;
   input[3].periodMax = 25000;
   input[3].xShiftMin = 0;
-  input[3].xShiftMax = 12500;
+  input[3].xShiftMax = 10000;
   input[3].amplitudeMin = 1;
   input[3].amplitudeMax = 409500;
   input[3].yShift = 1975;
@@ -141,7 +141,7 @@ void Sensors::refreshAll() {
             #ifdef DEBUG1
       Serial.println("Wave analysis complete");
             #endif
-      //calculatePower();
+      calculatePower();
       #ifdef DEBUG1
       //Serial.println("Power calculations complete");
             #endif
@@ -575,13 +575,23 @@ bool Sensors::checkStatus() {
   return false;
 }
 
-void Sensors::calculatePower() {
-  /*double angle1;
-  double angle2;
-  double angle3;*/
+void Sensors::calculatePower(int current) {
+  double power = 0;
+  int currentxShift;
+  int currentAmplitude;
+  int voltagexShift;
+  int voltageAmpliude;
 
-  // TODO 8000 2000 --> 
+  voltagexShift = input[0].xShift % input[0].xShiftMax/2;
+  currentxShift = input[current].xShift % input[current].xShiftMax/2;
 
+  if(currentxShift - voltagexShift < 0) {
+    currentxShift += input[current].xShiftMax/2;
+  }
+  
+  for(int i = 0; i < measurement_samples; i++) {
+    power += simulateWave(input[current], true, currentxShift, input[current].xShiftMax, int amplitude, i, input[0].period) * simulateWave(int yShift, true, int xShift, int xShiftMax, int amplitude, i, int period)
+  }
 }
 
 void Sensors::setOutputs(int mode) {
