@@ -17,7 +17,7 @@
 //#define DEBUG2 // Prints final output
 #define DEBUG3 // Generates random sample data
 #define DEBUG4 // Super verbose
-#define DEBUG5 // Prints regression
+//#define DEBUG5 // Prints regression
 
 class Sensors {
 public:
@@ -40,7 +40,7 @@ public:
 private:
 /*********************************  HELPERS  **********************************/
 
-  double 	simulateWave(int yShift, bool rectified, int xShift, int amplitude, int iterator, int period);
+  double 	simulateWave(int yShift, bool rectified, int xShift, int xShiftMax, int amplitude, int iterator, int period);
 	double 	waveError(int measurementIndex, int iterator, int xShift, int amplitude, int period);
 	void	 	recordSamples();
 	void 		analyzeSmoothedWaves(int measurementIndex = -1);

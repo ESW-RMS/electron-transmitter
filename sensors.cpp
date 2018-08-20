@@ -245,14 +245,14 @@ void Sensors::refreshAll() {
       }
 
       double Sensors::waveError(int measurementIndex, int iterator, int xShift, int amplitude, int period) {
-        return pow((samples[measurementIndex][iterator] - simulateWave(input[measurementIndex].yShift, input[measurementIndex].rectified, xShift, amplitude, iterator, period)), 2);
+        return pow((samples[measurementIndex][iterator] - simulateWave(input[measurementIndex].yShift, input[measurementIndex].rectified, xShift, input[measurementIndex].xShiftMax, amplitude, iterator, period)), 2);
       }
 
-      double Sensors::simulateWave(int yShift, bool rectified, int xShift, int amplitude, int iterator, int period) {
+      double Sensors::simulateWave(int yShift, bool rectified, int xShift, int xShiftMax, int amplitude, int iterator, int period) {
         if(rectified) {
-          return ((double)yShift + ((double)amplitude/(double)100) * fabs(cos( 2.0 * pi *  ((double)xShift + ((double)iterator*measurementDuration) / (double)period))));
+          return ((double)yShift + ((double)amplitude/(double)100) * fabs(cos( 2.0 * pi *  (((double)xShift/(double)xShiftMax) + (((double)iterator*measurementDuration) / (double)period)))));
         } else {
-          return ((double)yShift + ((double)amplitude/(double)100) * cos( 2.0 * pi *  ((double)xShift + ((double)iterator*measurementDuration) / (double)period)));
+          return ((double)yShift + ((double)amplitude/(double)100) * cos( 2.0 * pi *  (((double)xShift/(double)xShiftMax) + (((double)iterator*measurementDuration) / (double)period))));
         }
       }
 
@@ -290,7 +290,7 @@ void Sensors::refreshAll() {
         int sampleTime = -micros();
         for(unsigned int i = 0; i < measurement_samples; i++) {
           for(unsigned int j = 0; j < input_count; j++) {
-            samples[j][i] = simulateWave(input[j].yShift, input[j].rectified, input[j].xShift, input[j].amplitude, i, p);
+            samples[j][i] = simulateWave(input[j].yShift, input[j].rectified, input[j].xShift, input[j].xShiftMax, input[j].amplitude, i, p);
           }
         }
         if(a < 1) {
@@ -336,10 +336,8 @@ void Sensors::analyzeSmoothedWaves(int measurementIndex/* = -1*/) {
         }
       }
       input[index].amplitude = 100*(max-min);
-      input[index].xShift = measurementDuration*maxIndex;
         #ifdef DEBUG4
       Serial.println(String::format("%d - Preliminary amplitude: %d", index, input[index].amplitude));
-      Serial.println(String::format("%d - Preliminary xShift: %d", index, input[index].xShift));
         #endif
     }
     #ifdef DEBUG4
@@ -364,14 +362,13 @@ void Sensors::bruteforceFrequencies(int measurementIndex/* = -1*/) {
   for(; index < length; index++) {
     double error;
     double lowestError = -1;
-    int xShift = input[index].xShift;
+    int xShift = 0;
     int period;
     int iterator;
 
     int sampleCap = measurement_samples;
 
     for(int periodRound = 0; periodRound < 3; periodRound++) {
-      Serial.println(String::format("PERIOD ROUND %d ---------------------------------------------", periodRound));
       if(periodRound == 1) {
         sampleCap = period / measurementDuration;
       } else if(periodRound == 2) {
@@ -596,7 +593,7 @@ switch(mode) {
       Serial.println(String::format("%d, %f", i*measurementDuration, samples[j][i]));
     }
     for(unsigned int i = 0; i < measurement_samples; i++) {
-      Serial.println(String::format("%d, %f", i*measurementDuration, simulateWave(input[j].yShift, input[j].rectified, input[j].xShift, input[j].amplitude, i, input[j].period)));
+      Serial.println(String::format("%d, %f", i*measurementDuration, simulateWave(input[j].yShift, input[j].rectified, input[j].xShift, input[j].xShiftMax, input[j].amplitude, i, input[j].period)));
     }
   }
   break;
@@ -606,7 +603,7 @@ switch(mode) {
     Serial.println(String::format("%d, %f", i*measurementDuration, samples[j][i]));
   }
   for(unsigned int i = 0; i < measurement_samples; i++) {
-    Serial.println(String::format("%d, %f", i*measurementDuration, simulateWave(input[j].yShift, input[j].rectified, input[j].xShift, input[j].amplitude, i, input[j].period)));
+    Serial.println(String::format("%d, %f", i*measurementDuration, simulateWave(input[j].yShift, input[j].rectified, input[j].xShift, input[j].xShiftMax, input[j].amplitude, i, input[j].period)));
   }
   break;
 }
