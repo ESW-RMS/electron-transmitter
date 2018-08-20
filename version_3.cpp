@@ -15,6 +15,8 @@
 #include "application.h"
 #include "sensors.h"
 
+#define STATUS_CHANGE
+
 //set system mode
 SYSTEM_MODE(SEMI_AUTOMATIC);
 
@@ -23,9 +25,6 @@ SYSTEM_MODE(SEMI_AUTOMATIC);
 
 Sensors Sensorboard;
 
-//set site data
-String locationCode = "SUM";
-double csdf = 4000; //current sensor downgrading factor 
 unsigned long status_frequency = 5*60*1000; //milliseconds
 unsigned long measurement_frequency = 60*60*1000;
 unsigned long publish_frequency = 4*60*60*1000;
@@ -70,7 +69,7 @@ void setup() {
 }
 
 void loop(){
-    Sensorboard.fieldTest();
+    //Sensorboard.fieldTest();
     if (Time.format("%y").toInt() < 18 || Time.format("%y").toInt() > 70) {
         syncTime();
     } 
@@ -79,7 +78,7 @@ void loop(){
         Sensorboard.refreshStatus();
         lastStatus = millis();
         if (offline == 'y') {
-            if (Sensorboard.getGeneratorStatus()) {
+            if (Sensorboard.getGeneratorStatus()) { //true if generator is on
                 putInEEPROM("on,", 1900);
                 offline = 'n';
                 EEPROM.put(2030, offline);
@@ -106,8 +105,6 @@ void loop(){
         publish(true);
     }
 }
-
-void checkStatus(){}
 
 void syncTime() {
     cellular_credentials_set("internet", "wap", "wap123", NULL);
@@ -196,7 +193,7 @@ void publish(bool regular) { //if regular, measure publish, if !regular, status 
         delay(1*60*1000);
         if (Particle.connected()){
             Serial.println("particle connected, trying to publish to cloud");
-            if (!regular) {
+            if (regular == false) {
                 publishStatus();
             } else if (publishToCloud()){
                 Serial.println("publish worked");
@@ -242,8 +239,6 @@ void publishStatus(){
             EEPROM.put(1800, 0xFF);
             EEPROM.put(1900, 0xFF);
         }
-    } else {
-        sent = Particle.publish("DATA", "connected", 60);
     }
 }
 
