@@ -72,7 +72,7 @@ void Sensors::init() {
   input[2].xShiftMax = 10000;
   input[2].amplitudeMin = 1;
   input[2].amplitudeMax = 409500;
-  input[2].yShift = 2400;
+  input[2].yShift = 1975;
   input[2].waveMin = -1;
   input[2].waveMax = 4096;
   input[2].fa = 0;
@@ -142,8 +142,8 @@ void Sensors::refreshAll() {
       Serial.println("Wave analysis complete");
             #endif
       calculatePower();
-      #ifdef DEBUG1
-      //Serial.println("Power calculations complete");
+          #ifdef DEBUG1
+      Serial.println("Power calculations complete");
             #endif
     } else {
             setOutputs(0); // Set currents to 0 if generator is off
@@ -188,6 +188,7 @@ void Sensors::refreshAll() {
             current_1 = input[1].rms*compressionMultiplier;
             current_2 = input[2].rms*compressionMultiplier;
             current_3 = input[3].rms*compressionMultiplier;
+            power = power*compressionMultiplier;
 
             #ifdef DEBUG2
             Serial.println("\n---------FINAL OUTPUT---------");
@@ -196,6 +197,7 @@ void Sensors::refreshAll() {
             Serial.println(String::format("Current 1 RMS: %f", (double)current_1/(double)compressionMultiplier));
             Serial.println(String::format("Current 2 RMS: %f", (double)current_2/(double)compressionMultiplier));
             Serial.println(String::format("Current 3 RMS: %f", (double)current_3/(double)compressionMultiplier));
+            Serial.println(String::format("Power: %f", (double)power/(double)compressionMultiplier));
             Serial.println("------------------\n");
             #endif
 
@@ -205,8 +207,9 @@ void Sensors::refreshAll() {
             voltage = invalidPlaceholder;
             frequency = invalidPlaceholder;
             current_1 = invalidPlaceholder;
-            current_1 = invalidPlaceholder;
-            current_1 = invalidPlaceholder;
+            current_2 = invalidPlaceholder;
+            current_3 = invalidPlaceholder;
+            power = invalidPlaceholder;
           }
         }
       }
@@ -248,6 +251,10 @@ void Sensors::refreshAll() {
         return current_3;
       }
 
+      unsigned short Sensors::getPower() {
+        return (unsigned short)power;
+      }
+
       double Sensors::waveError(int measurementIndex, int iterator, int xShift, int amplitude, int period) {
         return pow((samples[measurementIndex][iterator] - simulateWave(input[measurementIndex].yShift, input[measurementIndex].rectified, xShift, input[measurementIndex].xShiftMax, amplitude, iterator, period)), 2);
       }
@@ -280,14 +287,23 @@ void Sensors::refreshAll() {
           Serial.println("\n---------GENERATED SAMPLES---------");
           Serial.println(String::format("Period: %d", p));
         }
+        input[0].xShift = 500;
+        input[0].amplitude = 200000;
+        input[1].xShift = 400;
+        input[1].amplitude = 20000;
+        input[2].xShift = 600;
+        input[2].amplitude = 20000;
+        input[3].xShift = 500;
+        input[3].amplitude = 20000;
         for(unsigned int i = 0; i < input_count; i++) {
-          input[i].xShift = rand() % (input[i].periodMax / 2);
-          input[i].amplitude = 20 + rand() % input[i].amplitudeMax;
+          //input[i].xShift = rand() % (input[i].periodMax / 2);
+          //input[i].amplitude = 20 + rand() % input[i].amplitudeMax;
           if(a > 0) {
             Serial.println(String::format("%d - xShift: %d", i, input[i].xShift));
             Serial.println(String::format("%d - amplitude: %d", i, input[i].amplitude));
           }
         }
+        
         if(a > 0) {
           Serial.println("------------------");
         }
@@ -441,6 +457,8 @@ void Sensors::bruteforceFrequencies(int measurementIndex/* = -1*/) {
             for(int j = 0; j < sampleCap; j++) {
               if(samples[index][j] > input[index].waveMin && samples[index][j] < input[index].waveMax) {
                 error += waveError(index, j, i, input[index].amplitude, period);
+              } else {
+                //Serial.println(String::format("%f, %d, %d", samples[index][j], input[index].waveMin, input[index].waveMax));
               }
             }
             error = sqrt(error);
@@ -568,29 +586,32 @@ return;
 
 bool Sensors::checkStatus() {
   for(unsigned int i = 0; i < status_samples; i++) {
-    if(samples[0][i] > inputActiveThreshold) {
+    if((int)samples[0][i] > inputActiveThreshold+input[0].yShift) {
       return true;
     }
   }
   return false;
 }
 
-void Sensors::calculatePower(int current) {
-  double power = 0;
+void Sensors::calculatePower() {
   int currentxShift;
-  int currentAmplitude;
   int voltagexShift;
+  int currentAmplitude;
   int voltageAmpliude;
+  power = 0;
+  for(int j = 1; j < 4; j++) {
+    currentxShift = input[j].xShift % (input[j].xShiftMax/4);
+    voltagexShift = input[0].xShift % (input[0].xShiftMax/4);
 
-  voltagexShift = input[0].xShift % input[0].xShiftMax/2;
-  currentxShift = input[current].xShift % input[current].xShiftMax/2;
+    currentAmplitude = input[1].rms*sqrt(2);
+    voltageAmpliude = input[0].rms*sqrt(2);
 
-  if(currentxShift - voltagexShift < 0) {
-    currentxShift += input[current].xShiftMax/2;
-  }
-  
-  for(int i = 0; i < measurement_samples; i++) {
-    power += simulateWave(input[current], true, currentxShift, input[current].xShiftMax, int amplitude, i, input[0].period) * simulateWave(int yShift, true, int xShift, int xShiftMax, int amplitude, i, int period)
+    if(currentxShift - voltagexShift > -20 && currentxShift - voltagexShift < 0) {
+      currentxShift = voltagexShift;
+    } else if(currentxShift - voltagexShift < -20) {
+      currentxShift += input[j].xShiftMax/4;
+    }
+    power += (double)input[0].rms * (double)input[1].rms * cos(2*pi*(currentxShift - voltagexShift)/input[0].xShiftMax);
   }
 }
 
@@ -601,9 +622,11 @@ void Sensors::setOutputs(int mode) {
       input[i].frequency = 0;
       input[i].rms = 0;
       input[i].error = 0;
+      input[i].amplitude = 0;
     }
     inputActive = false;
     measurementsValid = true;
+    power = 0;
     break;
   }
 }
