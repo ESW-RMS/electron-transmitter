@@ -3,8 +3,8 @@ Firmware for running the RMS code base on the Particle Electron
 
 ## To Do
 [x] True power calculation
-[] Field test printing
-[] Code review
+[ ] Field test printing
+[ ] Code review
 
 ##### Potential changes
 - Better Sensors setup
