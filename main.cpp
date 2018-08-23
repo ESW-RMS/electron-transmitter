@@ -285,8 +285,8 @@ bool publishToCloud(){
         EEPROM.get(address, power);
         EEPROM.get(address - 2, v);
         EEPROM.get(address - 4, freq);
-        EEPROM.get(address - 5, i3);
-        EEPROM.get(address - 6, i2);
+        EEPROM.get(address - 6, i3);
+        EEPROM.get(address - 8, i2);
         EEPROM.get(address - 10, i1);
         data += String::format(",%u,%u,%u,%u,%u,%u", i1, i2, i3, freq, v, power);
         Serial.println(data);
