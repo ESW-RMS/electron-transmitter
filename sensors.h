@@ -14,10 +14,9 @@
 #define SENSORS_H
 
 #define DEBUG1 // Verbose
-#define DEBUG2 // Prints final output
-//#define DEBUG3 // Generates random sample data
-#define DEBUG4 // Super verbose
-//#define DEBUG5 // Prints regression
+#define DEBUG2 // Prints calculations
+//#define DEBUG3 // Prints regression
+//#define DEBUG4 // Generates random sample data
 #define DEBUG6 // Print waves
 
 class Sensors {
@@ -30,7 +29,7 @@ public:
   void    refreshStatus();
   void    refreshAll();
   void    fieldTest();
-  bool    getGeneratorStatus();
+  bool    generatorIsOn();
   unsigned short    getVoltage();
   unsigned short    getFrequency();
   unsigned short    getCurrent_1();
