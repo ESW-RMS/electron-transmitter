@@ -15,9 +15,10 @@
 
 #define DEBUG1 // Verbose
 #define DEBUG2 // Prints final output
-#define DEBUG3 // Generates random sample data
+//#define DEBUG3 // Generates random sample data
 #define DEBUG4 // Super verbose
 //#define DEBUG5 // Prints regression
+#define DEBUG6 // Print waves
 
 class Sensors {
 public:
@@ -35,7 +36,7 @@ public:
   unsigned short    getCurrent_1();
   unsigned short    getCurrent_2();
   unsigned short    getCurrent_3();
-  unsigned short Sensors::getPower()
+  unsigned short    getPower();
   
 
 private:

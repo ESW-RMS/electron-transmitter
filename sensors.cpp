@@ -109,110 +109,112 @@ void Sensors::init() {
 }
 
 void Sensors::refreshAll() {
-    #ifdef DEBUG1
-  for(int i = 5; i > 0; i--) {
-    Serial.println(String::format("Starting measurement in %d", i));
-    delay(1000);
-  }
-    #endif
-  for(int attempts = 0; attempts < maxMeasurementAttempts; attempts++) {
-
+    #ifdef DEBUG6
+        recordSamples();
+        printWaves(6);
+        delay(10000);
+    #else
         #ifdef DEBUG1
-    Serial.println(String::format("--------------------Measurement attempt %d--------------------", attempts+1));
-    int startTime = -millis();
+            for(int i = 5; i > 0; i--) {
+                Serial.println(String::format("Starting measurement in %d", i));
+                delay(1000);
+            }
         #endif
-
-    recordSamples();
-        #ifdef DEBUG1
-    Serial.println("Samples recorded");
-        #endif
-
-    if(checkStatus()) {
-
-      analyzeSmoothedWaves();
+        for(int attempts = 0; attempts < maxMeasurementAttempts; attempts++) {
             #ifdef DEBUG1
-      Serial.println("Preliminary analysis complete");
+                Serial.println(String::format("--------------------Measurement attempt %d--------------------", attempts+1));
+                int startTime = -millis();
             #endif
-      bruteforceFrequencies();
+            recordSamples();
             #ifdef DEBUG1
-      Serial.println("Frequency analysis complete");
+                Serial.println("Samples recorded");
             #endif
-      bruteforceAmplitudes();
+            if(checkStatus()) {
+                analyzeSmoothedWaves();
+                #ifdef DEBUG1
+                    Serial.println("Preliminary analysis complete");
+                #endif
+                bruteforceFrequencies();
+                #ifdef DEBUG1
+                    Serial.println("Frequency analysis complete");
+                #endif
+                bruteforceAmplitudes();
+                #ifdef DEBUG1
+                    Serial.println("Wave analysis complete");
+                #endif
+                calculatePower();
+                #ifdef DEBUG1
+                    Serial.println("Power calculations complete");
+                #endif
+            } else {
+                setOutputs(0); // Set currents to 0 if generator is off
+            }
+
             #ifdef DEBUG1
-      Serial.println("Wave analysis complete");
-            #endif
-      calculatePower();
-          #ifdef DEBUG1
-      Serial.println("Power calculations complete");
-            #endif
-    } else {
-            setOutputs(0); // Set currents to 0 if generator is off
-          }
-
-        #ifdef DEBUG1
-          Serial.println("\n---------RESULTS---------");
-          Serial.println(String::format("Voltage Error - %f", input[0].error));
-          Serial.println(String::format("Current 1 Error - %f", input[0].error));
-          Serial.println(String::format("Current 2 Error - %f", input[0].error));
-          Serial.println(String::format("Current 3 Error - %f", input[0].error));
-          Serial.println("-------------------------");
-          if(input[0].error < maxError) {
-            Serial.println(String::format("Voltage: %d", input[0].amplitude));
-            Serial.println(String::format("Frequency: %f", input[0].frequency));
-          } else {
-            Serial.println("Voltage inconclusive");
-            Serial.println("Frequency inconclusive");
-          }
-          if(input[1].error < maxError) {
-            Serial.println(String::format("Current 1: %d", input[1].amplitude));
-          } else {
-            Serial.println("Current 1 inconclusive");
-          }
-          if(input[2].error < maxError) {
-            Serial.println(String::format("Current 2: %d", input[2].amplitude));
-          } else {
-            Serial.println("Current 2 inconclusive");
-          }
-          if(input[3].error < maxError) {
-            Serial.println(String::format("Current 3: %d", input[3].amplitude));
-          } else {
-            Serial.println("Current 3 inconclusive");
-          }
-          Serial.println(String::format("Time to measure: %f seconds", (double)(startTime + millis()) / 1000.));
-          Serial.println("------------------\n");
-        #endif
-
-          if(measurementsValid) {
-            voltage = input[0].rms*compressionMultiplier;
-            frequency = input[0].frequency*compressionMultiplier;
-            current_1 = input[1].rms*compressionMultiplier;
-            current_2 = input[2].rms*compressionMultiplier;
-            current_3 = input[3].rms*compressionMultiplier;
-            power = power*compressionMultiplier;
-
-            #ifdef DEBUG2
-            Serial.println("\n---------FINAL OUTPUT---------");
-            Serial.println(String::format("Voltage RMS: %f", (double)voltage/(double)compressionMultiplier));
-            Serial.println(String::format("Frequency: %f", (double)frequency/(double)compressionMultiplier));
-            Serial.println(String::format("Current 1 RMS: %f", (double)current_1/(double)compressionMultiplier));
-            Serial.println(String::format("Current 2 RMS: %f", (double)current_2/(double)compressionMultiplier));
-            Serial.println(String::format("Current 3 RMS: %f", (double)current_3/(double)compressionMultiplier));
-            Serial.println(String::format("Power: %f", (double)power/(double)compressionMultiplier));
-            Serial.println("------------------\n");
+                Serial.println("\n---------RESULTS---------");
+                Serial.println(String::format("Voltage Error - %f", input[0].error));
+                Serial.println(String::format("Current 1 Error - %f", input[0].error));
+                Serial.println(String::format("Current 2 Error - %f", input[0].error));
+                Serial.println(String::format("Current 3 Error - %f", input[0].error));
+                Serial.println("-------------------------");
+                if(input[0].error < maxError) {
+                    Serial.println(String::format("Voltage: %d", input[0].amplitude));
+                    Serial.println(String::format("Frequency: %f", input[0].frequency));
+                } else {
+                    Serial.println("Voltage inconclusive");
+                    Serial.println("Frequency inconclusive");
+                }
+                if(input[1].error < maxError) {
+                    Serial.println(String::format("Current 1: %d", input[1].amplitude));
+                } else {
+                    Serial.println("Current 1 inconclusive");
+                }
+                if(input[2].error < maxError) {
+                    Serial.println(String::format("Current 2: %d", input[2].amplitude));
+                } else {
+                    Serial.println("Current 2 inconclusive");
+                }
+                if(input[3].error < maxError) {
+                    Serial.println(String::format("Current 3: %d", input[3].amplitude));
+                } else {
+                    Serial.println("Current 3 inconclusive");
+                }
+                Serial.println(String::format("Time to measure: %f seconds", (double)(startTime + millis()) / 1000.));
+                Serial.println("------------------\n");
             #endif
 
-            break;
+            if(measurementsValid) {
+                voltage = input[0].rms*compressionMultiplier;
+                frequency = input[0].frequency*compressionMultiplier;
+                current_1 = input[1].rms*compressionMultiplier;
+                current_2 = input[2].rms*compressionMultiplier;
+                current_3 = input[3].rms*compressionMultiplier;
+                power = power*compressionMultiplier;
 
-          } else if(attempts == maxMeasurementAttempts - 1) {
-            voltage = invalidPlaceholder;
-            frequency = invalidPlaceholder;
-            current_1 = invalidPlaceholder;
-            current_2 = invalidPlaceholder;
-            current_3 = invalidPlaceholder;
-            power = invalidPlaceholder;
-          }
+                #ifdef DEBUG2
+                    Serial.println("\n---------FINAL OUTPUT---------");
+                    Serial.println(String::format("Voltage RMS: %f", (double)voltage/(double)compressionMultiplier));
+                    Serial.println(String::format("Frequency: %f", (double)frequency/(double)compressionMultiplier));
+                    Serial.println(String::format("Current 1 RMS: %f", (double)current_1/(double)compressionMultiplier));
+                    Serial.println(String::format("Current 2 RMS: %f", (double)current_2/(double)compressionMultiplier));
+                    Serial.println(String::format("Current 3 RMS: %f", (double)current_3/(double)compressionMultiplier));
+                    Serial.println(String::format("Power: %f", (double)power/(double)compressionMultiplier));
+                    Serial.println("------------------\n");
+                #endif
+
+                break;
+
+            } else if(attempts == maxMeasurementAttempts - 1) {
+                voltage = invalidPlaceholder;
+                frequency = invalidPlaceholder;
+                current_1 = invalidPlaceholder;
+                current_2 = invalidPlaceholder;
+                current_3 = invalidPlaceholder;
+                power = invalidPlaceholder;
+            }
         }
-      }
+    #endif
+}
 
       void Sensors::refreshStatus() {
         for(unsigned int i = 0; i < status_samples; i++) {
@@ -641,6 +643,18 @@ switch(mode) {
     for(unsigned int i = 0; i < measurement_samples; i++) {
       Serial.println(String::format("%d, %f", i*measurementDuration, simulateWave(input[j].yShift, input[j].rectified, input[j].xShift, input[j].xShiftMax, input[j].amplitude, i, input[j].period)));
     }
+  }
+  break;
+  case 5:
+  for(unsigned int j = 0; j < input_count; j++) {
+    for(unsigned int i = 0; i < measurement_samples; i++) {
+      Serial.println(String::format("%d, %f", i*measurementDuration, samples[j][i]));
+    }
+  }
+  break;
+  case 6:
+    for(unsigned int i = 0; i < measurement_samples; i++) {
+      Serial.println(String::format("%d, %f", i*measurementDuration, samples[0][i]));
   }
   break;
   default:
