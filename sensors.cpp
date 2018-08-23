@@ -236,7 +236,6 @@ void Sensors::refreshAll() {
     }
     sampleTime += micros();
     measurementDuration = ((double)sampleTime / (double)measurement_samples);
-    Serial.println(String::format("%f", measurementDuration));
 #else
     measurementDuration = 160;
     srand(micros() % 1000000);
@@ -544,7 +543,7 @@ void Sensors::bruteforceAmplitudes(int measurementIndex/* = -1*/) {
             Serial.println("Wave analysis complete");
         #endif
     }
-    
+
     return;
 }
 

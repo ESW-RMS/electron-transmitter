@@ -16,7 +16,7 @@
 #define DEBUG1 // Verbose
 #define DEBUG2 // Prints calculations
 //#define DEBUG3 // Prints regression
-//#define DEBUG4 // Generates random sample data
+#define DEBUG4 // Generates random sample data
 
 class Sensors {
 public:
