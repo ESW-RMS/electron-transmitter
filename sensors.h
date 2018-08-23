@@ -14,7 +14,7 @@
 #define SENSORS_H
 
 #define DEBUG1 // Verbose
-#define DEBUG2 // Prints calculations
+//#define DEBUG2 // Prints calculations
 //#define DEBUG3 // Prints regression
 #define DEBUG4 // Generates random sample data
 

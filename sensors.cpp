@@ -25,7 +25,7 @@ void Sensors::init() {
   }
   input[0].pin = A0;
   input[0].yShift = -330;
-  input[0].waveMin = 800;
+  input[0].waveMin = -1;
   input[0].waveMax = 4096;
   input[0].fa = 0; //
   input[0].fb = 1;
@@ -538,11 +538,11 @@ void Sensors::bruteforceAmplitudes(int measurementIndex/* = -1*/) {
             Serial.println(String::format("2.%d amplitude: %d", index, input[index].amplitude));
             Serial.println(String::format("2.%d error: %f", index, input[index].error));
         #endif
-        #ifdef DEBUG1
-            Serial.println("------------------");
-            Serial.println("Wave analysis complete");
-        #endif
     }
+    #ifdef DEBUG1
+        Serial.println("------------------");
+        Serial.println("Wave analysis complete");
+    #endif
 
     return;
 }
