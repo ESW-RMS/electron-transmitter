@@ -41,7 +41,7 @@ public:
 private:
 /*********************************  HELPERS  **********************************/
 
-  double 	simulateWave(int yShift, bool rectified, int xShift, int xShiftMax, int amplitude, int iterator, int period);
+  double 	simulateWave(int yShift, bool rectified, int xShift, int amplitude, int iterator, int period);
 	double 	waveError(int measurementIndex, int iterator, int xShift, int amplitude, int period);
 	void	 	recordSamples();
 	void 		analyzeSmoothedWaves(int measurementIndex = -1);
@@ -61,26 +61,16 @@ private:
   	int 					pin;
   	double 				rms;
   	double 				frequency;
-  	double 				a; // rms cubic coefficient
-  	double 				b; // rms quad coefficient
-  	double 				c; // rms linear coefficient
-  	double 				d; // rms constant
-  	double 				fa; // freq cubic coefficient
-  	double 				fb; // freq quad coefficient
-  	double 				fc; // freq linear coefficient
-  	double 				fd; // freq constant
+  	double 				a;
+  	double 				b;
+  	double 				c;
+  	double 				fa;
+    double 				fb;
+    double 				fc;
 
-  	unsigned int 	periodMin;
   	unsigned int 	period;
-  	unsigned int 	periodMax;
-
-  	unsigned int 	xShiftMin;
   	unsigned int 	xShift;
-  	unsigned int 	xShiftMax;
-
-  	unsigned int 	amplitudeMin;
   	unsigned int 	amplitude;
-  	unsigned int 	amplitudeMax;
 
   	int 					yShift;
   	int 					waveMin;
@@ -113,6 +103,17 @@ private:
 	double smoothed_wave[measurement_samples - smoothing_n + 1]; // Must be global to work on particle (smoothed voltage array)
 	static const unsigned int regression_n = 10; // Feature matching stride
 	int measurementDuration;
+
+
+  const unsigned int periodRangeMin = 15000;
+  const unsigned int periodRangeMax = 25000;
+  const unsigned int xShiftRangeMin = 0;
+  const unsigned int xShiftRangeMax = 10000;
+  const unsigned int amplitudeRangeMin = 1;
+  const unsigned int amplitudeRangeMax = 409500;
+
+
+	double measurementDuration;
 	bool measurementsValid;
 	Measurement input[input_count];
 };
