@@ -17,7 +17,6 @@
 #define DEBUG2 // Prints calculations
 //#define DEBUG3 // Prints regression
 //#define DEBUG4 // Generates random sample data
-#define DEBUG6 // Print waves
 
 class Sensors {
 public:
@@ -97,12 +96,11 @@ private:
 	static const int maxMeasurementAttempts = 10;
 	static const int invalidPlaceholder = 9999;
 	static constexpr double compressionMultiplier = 100;
-	static const unsigned int inputActiveThreshold = 100;
+	static const int inputActiveThreshold = 100;
 	bool inputActive = false;
 	static const unsigned int smoothing_n = 5; // Voltage wave mean smoothing bucket size
 	double smoothed_wave[measurement_samples - smoothing_n + 1]; // Must be global to work on particle (smoothed voltage array)
 	static const unsigned int regression_n = 10; // Feature matching stride
-	int measurementDuration;
 
 
   const unsigned int periodRangeMin = 15000;
