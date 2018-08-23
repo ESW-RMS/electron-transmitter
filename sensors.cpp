@@ -308,7 +308,7 @@ void Sensors::analyzeSmoothedWaves(int measurementIndex/* = -1*/) {
           min = smoothed_wave[i + 1];
         }
       }
-      input[index].amplitude = 100*(max-min);
+      input[index].amplitude = input[index].rectified ? 100*(max-min) : 50*(max-min);
         #ifdef DEBUG2
       Serial.println(String::format("%d - Preliminary amplitude: %d", index, input[index].amplitude));
         #endif
@@ -526,6 +526,10 @@ void Sensors::bruteforceAmplitudes(int measurementIndex/* = -1*/) {
             #ifdef DEBUG2
                 Serial.println(String::format("2.%d amplitude: %d", index, input[index].amplitude));
                 Serial.println(String::format("2.%d error: %f", index, input[index].error));
+            #endif
+            #ifdef DEBUG1
+                Serial.println("------------------");
+                Serial.println("ATTEMPT FAILED");
             #endif
             return;
         }

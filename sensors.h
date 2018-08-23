@@ -14,8 +14,8 @@
 #define SENSORS_H
 
 #define DEBUG1 // Verbose
-//#define DEBUG2 // Prints calculations
-//#define DEBUG3 // Prints regression
+//#define DEBUG2 // Prints calculations - DEBUG1 should be enabled
+//#define DEBUG3 // Prints regression - DEBUG1&2 should be enabled
 #define DEBUG4 // Generates random sample data
 
 class Sensors {
