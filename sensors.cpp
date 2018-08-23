@@ -86,7 +86,6 @@ void Sensors::refreshAll() {
             Serial.println(String::format("Starting measurement in %d", i));
             delay(1000);
         }
-        int startTime = -millis();
     #endif
     for(int attempts = 0; attempts < maxMeasurementAttempts; attempts++) {
         #ifdef DEBUG1
@@ -101,7 +100,7 @@ void Sensors::refreshAll() {
             bruteforceFrequencies();
             bruteforceAmplitudes();
         } else {
-            setOutputs(0); // Set currents to 0 if generator is off
+            zeroMeasurements(); // Set currents to 0 if generator is off
         }
 
         if(measurementsValid) {
@@ -259,7 +258,7 @@ void Sensors::analyzeSmoothedWaves() {
     #ifdef DEBUG2
     Serial.println("------------------");
     #endif
-    for(int index = 0; index < input_count; index++) {
+    for(unsigned int index = 0; index < input_count; index++) {
         if(!input[index].ignore) {
             double avg = 0;
             for(unsigned int i = 0; i < smoothing_n; i++) {
@@ -297,7 +296,7 @@ void Sensors::bruteforceFrequencies() {
         Serial.println("------------------");
     #endif
     
-    for(int index = 0; index < input_count; index++) {
+    for(unsigned int index = 0; index < input_count; index++) {
         if(!input[index].ignore) {
             double error;
             double lowestError = -1;
@@ -434,7 +433,7 @@ void Sensors::bruteforceAmplitudes() {
 
     measurementsValid = true;
 
-    for(int index = 0; index < input_count; index++) {
+    for(unsigned int index = 0; index < input_count; index++) {
         if(!input[index].ignore) {
             double error;
             double lowestError = -1;
@@ -554,29 +553,32 @@ void Sensors::calculatePower() {
     #endif
 }
 
-void Sensors::setOutputs(int mode) {
-  switch(mode) {
-    case 0:
+void Sensors::zeroMeasurements() {
     for(int i = 0; i < 4; i++) {
-      input[i].frequency = 0;
-      input[i].rms = 0;
-      input[i].error = 0;
-      input[i].amplitude = 0;
+        if(!input[i].ignore) {
+            input[i].frequency = 0;
+            input[i].rms = 0;
+            input[i].amplitude = 0;
+            input[i].error = 0;
+        } else {
+            input[i].frequency = invalidPlaceholder;
+            input[i].rms = invalidPlaceholder;
+            input[i].amplitude = invalidPlaceholder;
+            input[i].error = 0;
+        }
     }
     inputActive = false;
     measurementsValid = true;
     power = 0;
-    break;
-  }
 }
 
 void Sensors::printWaves(int index, bool simulated) {
     for(unsigned int i = 0; i < measurement_samples; i++) {
-        Serial.println(String::format("%d, %f", i*measurementDuration, samples[index][i]));
+        Serial.println(String::format("%d, %f", i*(int)measurementDuration, samples[index][i]));
     }
     if(simulated) {
         for(unsigned int i = 0; i < measurement_samples; i++) {
-            Serial.println(String::format("%d, %f", i*measurementDuration, simulateWave(input[j].yShift, input[j].rectified, input[j].xShift, input[j].amplitude, i, input[j].period)));
+            Serial.println(String::format("%d, %f", i*(int)measurementDuration, simulateWave(input[index].yShift, input[index].rectified, input[index].xShift, input[index].amplitude, i, input[index].period)));
         }
     }
 }

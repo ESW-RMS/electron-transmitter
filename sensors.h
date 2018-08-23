@@ -48,7 +48,7 @@ private:
 	void 		bruteforceAmplitudes();
   void    calculatePower();
 	bool 		checkStatus();
-	void 		setOutputs(int mode);
+	void 		zeroMeasurements();
   double    evaluatePolynomial(double a, double b, double c, double x);
 	void 		printWaves(int index, bool simulated); // -1 --> all, 0-3 --> specific wave, uses a switch for easy customization
 
@@ -75,6 +75,7 @@ private:
   	int 					waveMax;
   	double 				error;
     bool          rectified;
+    bool          ignore;
 };
 
 	unsigned short 	voltage;
