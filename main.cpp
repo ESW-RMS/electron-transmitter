@@ -84,7 +84,7 @@ void loop(){
         Sensorboard.refreshStatus();
         lastStatus = millis();
         if (offline == 'y') {
-            if (Sensorboard.getGeneratorStatus()) { //true if generator is on
+            if (Sensorboard.generatorIsOn()) {
                 putInEEPROM("on,", 1900);
                 offline = 'n';
                 EEPROM.put(2030, offline);
@@ -92,7 +92,7 @@ void loop(){
                 EEPROM.put(1900, 0xFF);
             }
         } else {
-            if (!Sensorboard.getGeneratorStatus()) {
+            if (!Sensorboard.generatorIsOn()) {
                 putInEEPROM("off,", 1800);
                 offline = 'y';
                 EEPROM.put(2030, offline);
