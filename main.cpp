@@ -282,7 +282,7 @@ bool publishToCloud(){
         unsigned short i1;
         unsigned short i2;
         unsigned short i3;
-        EEPROM.get(address, power)
+        EEPROM.get(address, power);
         EEPROM.get(address - 2, v);
         EEPROM.get(address - 4, freq);
         EEPROM.get(address - 5, i3);
