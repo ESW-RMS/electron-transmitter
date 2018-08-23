@@ -114,11 +114,11 @@ void Sensors::refreshAll() {
             Serial.println(String::format("Starting measurement in %d", i));
             delay(1000);
         }
+        int startTime = -millis();
     #endif
     for(int attempts = 0; attempts < maxMeasurementAttempts; attempts++) {
         #ifdef DEBUG1
             Serial.println(String::format("------------------Measurement attempt %d------------------", attempts+1));
-            int startTime = -millis();
         #endif
         recordSamples();
         
