@@ -132,6 +132,7 @@ void Sensors::refreshAll() {
 
         if(measurementsValid) {
             calculatePower();
+            break;
         }
     }
     #ifdef DEBUG2
