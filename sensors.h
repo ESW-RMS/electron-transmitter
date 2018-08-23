@@ -14,7 +14,7 @@
 #define SENSORS_H
 
 #define DEBUG1 // Verbose
-//#define DEBUG2 // Prints final output
+#define DEBUG2 // Prints final output
 #define DEBUG3 // Generates random sample data
 #define DEBUG4 // Super verbose
 //#define DEBUG5 // Prints regression
@@ -35,6 +35,7 @@ public:
   unsigned short    getCurrent_1();
   unsigned short    getCurrent_2();
   unsigned short    getCurrent_3();
+  unsigned short Sensors::getPower()
   
 
 private:
@@ -94,9 +95,7 @@ private:
 	unsigned short 	current_3;
   unsigned short totalPower;
 
-  double  power_1;
-  double  power_2;
-  double  power_3;
+  double  power;
 
 	static constexpr double 	pi = 3.1415926535; // pi
 	static const unsigned int measurement_samples = 2000; // Number of samples to take .73 seconds worth of data
@@ -107,7 +106,7 @@ private:
 	static const int maxMeasurementAttempts = 10;
 	static const int invalidPlaceholder = 9999;
 	static constexpr double compressionMultiplier = 100;
-	static const unsigned int inputActiveThreshold = 200;
+	static const unsigned int inputActiveThreshold = 100;
 	bool inputActive = false;
 	static const unsigned int smoothing_n = 5; // Voltage wave mean smoothing bucket size
 	double smoothed_wave[measurement_samples - smoothing_n + 1]; // Must be global to work on particle (smoothed voltage array)
