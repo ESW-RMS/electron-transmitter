@@ -14,9 +14,9 @@
 #define SENSORS_H
 
 #define DEBUG1 // Verbose
-//#define DEBUG2 // Prints calculations - DEBUG1 should be enabled
+#define DEBUG2 // Prints calculations - DEBUG1 should be enabled
 //#define DEBUG3 // Prints regression - DEBUG1&2 should be enabled
-#define DEBUG4 // Generates random sample data
+//#define DEBUG4 // Generates random sample data
 
 class Sensors {
 public:
@@ -43,16 +43,15 @@ private:
   double 	simulateWave(int yShift, bool rectified, int xShift, int amplitude, int iterator, int period);
 	double 	waveError(int measurementIndex, int iterator, int xShift, int amplitude, int period);
 	void	 	recordSamples();
-	void 		analyzeSmoothedWaves(int measurementIndex = -1);
-	void 		bruteforceFrequencies(int measurementIndex = -1);
-	void 		bruteforceAmplitudes(int measurementIndex = -1);
+	void 		analyzeSmoothedWaves();
+	void 		bruteforceFrequencies();
+	void 		bruteforceAmplitudes();
   void    calculatePower();
 	bool 		checkStatus();
 	void 		setOutputs(int mode);
   double    evaluatePolynomial(double a, double b, double c, double x);
-	#ifdef DEBUG1
-	void 		printWaves(int mode = -1); // -1 --> all, 0-3 --> specific wave, uses a switch for easy customization
-	#endif
+	void 		printWaves(int index, bool simulated); // -1 --> all, 0-3 --> specific wave, uses a switch for easy customization
+
 
 /*********************************  OBJECTS  **********************************/
 
