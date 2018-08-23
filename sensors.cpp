@@ -56,9 +56,9 @@ void Sensors::init() {
   input[1].fb = 1;
   input[1].fc = 0;
   input[1].a = 0;
-  input[1].rectified = true;
   input[1].b = 1;
   input[1].c = 0;
+  input[1].rectified = false;
 
   // Current 2
   input[2].pin = A2;
@@ -75,7 +75,6 @@ void Sensors::init() {
   input[2].fb = 1;
   input[2].fc = 0;
   input[2].a = 0;
-  input[2].rectified = true;
   input[2].b = 1;
   input[2].c = 0;
 
@@ -96,6 +95,7 @@ void Sensors::init() {
   input[3].a = 0;
   input[3].b = 1;
   input[3].c = 0;
+  input[3].rectified = false;
 
 }
 
