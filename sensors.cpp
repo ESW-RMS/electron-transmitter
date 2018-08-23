@@ -34,13 +34,11 @@ void Sensors::init() {
   input[0].waveMin = 800;
   input[0].waveMax = 4096;
   input[0].fa = 0; //
-  input[0].fb = 0;
-  input[0].fc = 1;
-  input[0].fd = 0;
+  input[0].fb = 1;
+  input[0].fc = 0;
   input[0].a = 0; //
-  input[0].b = 0;
-  input[0].c = 1;
-  input[0].d = 0;
+  input[0].b = 1;
+  input[0].c = 0;
   input[0].rectified = true;
 
   // Current 1
@@ -55,14 +53,12 @@ void Sensors::init() {
   input[1].waveMin = -1;
   input[1].waveMax = 4096;
   input[1].fa = 0;
-  input[1].fb = 0;
-  input[1].fc = 1;
-  input[1].fd = 0;
+  input[1].fb = 1;
+  input[1].fc = 0;
   input[1].a = 0;
-  input[1].b = 0;
-  input[1].c = 1;
-  input[1].d = 0;
   input[1].rectified = true;
+  input[1].b = 1;
+  input[1].c = 0;
 
   // Current 2
   input[2].pin = A2;
@@ -76,14 +72,12 @@ void Sensors::init() {
   input[2].waveMin = -1;
   input[2].waveMax = 4096;
   input[2].fa = 0;
-  input[2].fb = 0;
-  input[2].fc = 1;
-  input[2].fd = 0;
+  input[2].fb = 1;
+  input[2].fc = 0;
   input[2].a = 0;
-  input[2].b = 0;
-  input[2].c = 1;
-  input[2].d = 0;
   input[2].rectified = true;
+  input[2].b = 1;
+  input[2].c = 0;
 
   // Current 3
   input[3].pin = A3;
@@ -97,14 +91,11 @@ void Sensors::init() {
   input[3].waveMin = -1;
   input[3].waveMax = 4096;
   input[3].fa = 0;
-  input[3].fb = 0;
-  input[3].fc = 1;
-  input[3].fd = 0;
+  input[3].fb = 1;
+  input[3].fc = 0;
   input[3].a = 0;
-  input[3].b = 0;
-  input[3].c = 1;
-  input[3].d = 0;
-  input[3].rectified = true;
+  input[3].b = 1;
+  input[3].c = 0;
 
 }
 
