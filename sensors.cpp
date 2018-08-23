@@ -88,7 +88,6 @@ void Sensors::refreshAll() {
         #ifdef DEBUG1
             Serial.println("------------------");
             Serial.println(String::format("MEASUREMENT ATTEMPT %d", attempts+1));
-            Serial.println("------------------");
         #endif
 
         recordSamples();
@@ -419,10 +418,6 @@ void Sensors::bruteforceFrequencies(int measurementIndex/* = -1*/) {
             }
             error = sqrt(error);
             #ifdef DEBUG3
-                if(error < 1) {
-                  Serial.println("Error was incorrect");
-                  Serial.println(String::format("xShift - %d | yShift - %d | amplitude - %d | period - %d", i, input[index].yShift, input[index].amplitude, period));
-                }
                 Serial.println(String::format("%d - Error %f", index, error));
             #endif
             if(error < lowestError || lowestError < 0) {
@@ -449,10 +444,6 @@ void Sensors::bruteforceFrequencies(int measurementIndex/* = -1*/) {
     Serial.println(String::format("1.%d period: %d", index, period));
     Serial.println(String::format("1.%d error: %f", index, input[index].error));
     #endif
-    #ifdef DEBUG1
-    Serial.println("------------------");
-    Serial.println("Frequency analysis complete");
-    #endif
     input[index].xShift = xShift;
     input[index].period = period;
 
@@ -463,6 +454,10 @@ void Sensors::bruteforceFrequencies(int measurementIndex/* = -1*/) {
       input[index].frequency = evaluatePolynomial(input[index].fa, input[index].fb, input[index].fc, (double)input[index].frequency);
     }
   }
+    #ifdef DEBUG1
+        Serial.println("------------------");
+        Serial.println("Frequency analysis complete");
+    #endif
   return;
 }
 
