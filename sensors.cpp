@@ -486,7 +486,7 @@ void Sensors::bruteforceFrequencies(int measurementIndex/* = -1*/) {
       input[index].frequency = 0;
     } else {
       input[index].frequency = (((double)1000 * (double)1000. / (double)input[index].period));
-      input[index].frequency = (pow((double)input[index].frequency, 3)*(double)input[index].fa + pow((double)input[index].frequency, 2)*(double)input[index].fb + (double)input[index].frequency*(double)input[index].fc + (double)input[index].fd);
+      input[index].frequency = evaluatePolynomial(input[index].fa, input[index].fb, input[index].fc, (double)input[index].frequency);
     }
   }
   return;
@@ -665,3 +665,7 @@ switch(mode) {
 }
 }
 #endif
+
+double Sensors::evaluatePolynomial(double a, double b, double c, double x) {
+    return pow(x, 2)*a + x*b + c;
+}

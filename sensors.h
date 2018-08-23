@@ -50,6 +50,7 @@ private:
   void    calculatePower();
 	bool 		checkStatus();
 	void 		setOutputs(int mode);
+  double    evaluatePolynomial(double a, double b, double c, double x);
 	#ifdef DEBUG1
 	void 		printWaves(int mode = -1); // -1 --> all, 0-3 --> specific wave, uses a switch for easy customization
 	#endif
