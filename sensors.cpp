@@ -46,7 +46,7 @@ void Sensors::init() {
     input[1].b = 1;
     input[1].c = 0;
     input[1].rectified = false;
-    input[1].ignore = false;
+    input[1].ignore = true;
     input[1].maxError = 5000;
 
     // Current 2
@@ -58,7 +58,7 @@ void Sensors::init() {
     input[2].b = 1;
     input[2].c = 0;
     input[2].rectified = false;
-    input[2].ignore = false;
+    input[2].ignore = true;
     input[2].maxError = 5000;
 
     // Current 3
@@ -70,7 +70,7 @@ void Sensors::init() {
     input[3].b = 1;
     input[3].c = 0;
     input[3].rectified = false;
-    input[3].ignore = false;
+    input[3].ignore = true;
     input[3].maxError = 5000;
 
 }
@@ -426,14 +426,15 @@ void Sensors::bruteforceFrequencies() {
                 Serial.println(String::format("1.%d error: %f", index, input[index].error));
             #endif
             input[index].xShift = xShift;
+            if(period < 15002) {
+                d_frequency = 0;
+            } else {
+                d_frequency = (((double)1000 * (double)1000. / (double)period));
+            }
         } else {
             input[index].xShift = invalidPlaceholder;
         }
-        if(period < 15002) {
-            d_frequency = 0;
-        } else {
-            d_frequency = (((double)1000 * (double)1000. / (double)period));
-        }
+        
         
     }
     #ifdef VERBOSE

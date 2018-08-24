@@ -13,12 +13,12 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-#define VERBOSE // Verbose
-#define SHOWSTEPS // Prints calculations - DEBUG1 should be enabled
+//#define VERBOSE // Verbose
+//#define SHOWSTEPS // Prints calculations - DEBUG1 should be enabled
 //#define SHOWREGRESSION // Prints regression - DEBUG1&2 should be enabled
 //#define GENERATESAMPLES // Generates random sample data
-#define MEASUREFLASH // Flashes during measurement
-#define IGNOREPOWER // Take a guess
+//#define MEASUREFLASH // Flashes during measurement
+//#define IGNOREPOWER // Take a guess
 
 class Sensors {
 public:
