@@ -86,6 +86,9 @@ private:
   unsigned short totalPower;
 
   double  power;
+  #ifdef MEASUREFLASH
+    LEDStatus led;
+  #endif
 
 	static constexpr double 	pi = 3.1415926535; // pi
 	static const unsigned int measurement_samples = 2000; // Number of samples to take .73 seconds worth of data

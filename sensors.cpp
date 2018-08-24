@@ -77,6 +77,9 @@ void Sensors::init() {
   input[3].c = 0;
   input[3].rectified = false;
   input[3].ignore = true;
+    #ifdef MEASUREFLASH
+        led.setActive();
+    #endif
 
 }
 
@@ -95,6 +98,14 @@ void Sensors::refreshAll() {
 
         recordSamples();
         
+        #ifdef MEASUREFLASH
+            led.on();
+        #endif
+        recordSamples();
+        #ifdef MEASUREFLASH
+            led.off();
+        #endif
+
         if(checkStatus()) {
             analyzeSmoothedWaves();
             bruteforceFrequencies();
