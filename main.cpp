@@ -298,6 +298,7 @@ bool publishToCloud(){
             if (info != 0xFFFF) value = 140;
         }
         counter++;
+        #ifndef TEST
         if (counter == 4) {
             Serial.println("this is what im publishing: " + data);
             if (publishedAll != 'n' && include_time) {
@@ -320,6 +321,11 @@ bool publishToCloud(){
                 return false;
             }
         }
+        #endif
+        #ifdef TEST
+        sent = Particle.publish("DATA", data, 60);
+        if (!sent) return false;
+        #endif
         if (value == temp) break;
     }
     Serial.println("eeprom is being cleared");
