@@ -13,10 +13,12 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
-#define DEBUG1 // Verbose
-#define DEBUG2 // Prints calculations - DEBUG1 should be enabled
-//#define DEBUG3 // Prints regression - DEBUG1&2 should be enabled
-//#define DEBUG4 // Generates random sample data
+#define VERBOSE // Verbose
+#define SHOWSTEPS // Prints calculations - DEBUG1 should be enabled
+//#define SHOWREGRESSION // Prints regression - DEBUG1&2 should be enabled
+//#define GENERATESAMPLES // Generates random sample data
+#define MEASUREFLASH // Flashes during measurement
+#define IGNOREPOWER // Take a guess
 
 class Sensors {
 public:
@@ -40,8 +42,8 @@ public:
 private:
 /*********************************  HELPERS  **********************************/
 
-  double 	simulateWave(int yShift, bool rectified, int xShift, int amplitude, int iterator, int period);
-	double 	waveError(int measurementIndex, int iterator, int xShift, int amplitude, int period);
+  double 	simulateWave(int yShift, bool rectified, int xShift, int amplitude, int iterator);
+	double 	waveError(int measurementIndex, int iterator, int xShift, int amplitude);
 	void	 	recordSamples();
 	void 		analyzeSmoothedWaves();
 	void 		bruteforceFrequencies();
@@ -58,7 +60,6 @@ private:
   struct Measurement {
   	int 					pin;
   	double 				rms;
-  	double 				frequency;
   	double 				a;
   	double 				b;
   	double 				c;
@@ -66,7 +67,6 @@ private:
     double 				fb;
     double 				fc;
 
-  	unsigned int 	period;
   	unsigned int 	xShift;
   	unsigned int 	amplitude;
 
@@ -76,6 +76,7 @@ private:
   	double 				error;
     bool          rectified;
     bool          ignore;
+    double        maxError;
 };
 
 	unsigned short 	voltage;
@@ -83,9 +84,13 @@ private:
 	unsigned short 	current_1;
 	unsigned short 	current_2;
 	unsigned short 	current_3;
-  unsigned short totalPower;
+  unsigned short  totalPower;
+  unsigned int    period;
+  double          d_frequency;
 
   double  power;
+  double tmp;
+
   #ifdef MEASUREFLASH
     LEDStatus led;
   #endif
@@ -95,8 +100,7 @@ private:
 	static const unsigned int status_samples = 600; // Quick check for status - takes ~.2 seconds
 	static const unsigned int input_count = 4;
 	double samples[input_count][measurement_samples]; // Must be global to work on Particle (sampling array)
-	static const int maxError = 500;
-	static const int maxMeasurementAttempts = 10;
+	static const int maxMeasurementAttempts = 3;
 	static const int invalidPlaceholder = 9999;
 	static constexpr double compressionMultiplier = 100;
 	static const int inputActiveThreshold = 100;

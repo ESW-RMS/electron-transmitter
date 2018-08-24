@@ -20,83 +20,73 @@ Sensors::Sensors() {
 
 void Sensors::init() {
 
-  for(unsigned int i = 0; i < input_count; i++) {
-    pinMode(input[i].pin, INPUT);
-  }
-  input[0].pin = A0;
-  input[0].yShift = -330;
-  input[0].waveMin = 800;
-  input[0].waveMax = 4096;
-  input[0].fa = 0; //
-  input[0].fb = 1;
-  input[0].fc = 0;
-  input[0].a = 0; //
-  input[0].b = 1;
-  input[0].c = 0;
-  input[0].rectified = true;
-  input[0].ignore = false;
-
-  // Current 1
-  input[1].pin = A1;
-  input[1].yShift = 1975;
-  input[1].waveMin = -1;
-  input[1].waveMax = 4096;
-  input[1].fa = 0;
-  input[1].fb = 1;
-  input[1].fc = 0;
-  input[1].a = 0;
-  input[1].b = 1;
-  input[1].c = 0;
-  input[1].rectified = false;
-  input[1].ignore = true;
-
-  // Current 2
-  input[2].pin = A2;
-  input[2].yShift = 1975;
-  input[2].waveMin = -1;
-  input[2].waveMax = 4096;
-  input[2].fa = 0;
-  input[2].fb = 1;
-  input[2].fc = 0;
-  input[2].a = 0;
-  input[2].b = 1;
-  input[2].c = 0;
-  input[2].rectified = false;
-  input[2].ignore = true;
-
-  // Current 3
-  input[3].pin = A3;
-  input[3].yShift = 1975;
-  input[3].waveMin = -1;
-  input[3].waveMax = 4096;
-  input[3].fa = 0;
-  input[3].fb = 1;
-  input[3].fc = 0;
-  input[3].a = 0;
-  input[3].b = 1;
-  input[3].c = 0;
-  input[3].rectified = false;
-  input[3].ignore = true;
+    for(unsigned int i = 0; i < input_count; i++) {
+        pinMode(input[i].pin, INPUT);
+    }
     #ifdef MEASUREFLASH
         led.setActive();
     #endif
+    input[0].pin = A0;
+    input[0].yShift = -321;
+    input[0].waveMin = 550;
+    input[0].waveMax = 4096;
+    input[0].a = 0; 
+    input[0].b = .0015422152;
+    input[0].c = 16.52494;
+    input[0].rectified = true;
+    input[0].ignore = true;
+    input[0].maxError = 5000;
+
+    // Current 1
+    input[1].pin = A1;
+    input[1].yShift = 1975;
+    input[1].waveMin = -1;
+    input[1].waveMax = 4096;
+    input[1].a = 0;
+    input[1].b = 1;
+    input[1].c = 0;
+    input[1].rectified = false;
+    input[1].ignore = false;
+    input[1].maxError = 5000;
+
+    // Current 2
+    input[2].pin = A2;
+    input[2].yShift = 1975;
+    input[2].waveMin = -1;
+    input[2].waveMax = 4096;
+    input[2].a = 0;
+    input[2].b = 1;
+    input[2].c = 0;
+    input[2].rectified = false;
+    input[2].ignore = false;
+    input[2].maxError = 5000;
+
+    // Current 3
+    input[3].pin = A3;
+    input[3].yShift = 1975;
+    input[3].waveMin = -1;
+    input[3].waveMax = 4096;
+    input[3].a = 0;
+    input[3].b = 1;
+    input[3].c = 0;
+    input[3].rectified = false;
+    input[3].ignore = false;
+    input[3].maxError = 5000;
 
 }
 
 void Sensors::refreshAll() {
-    #ifdef DEBUG1
-        for(int i = 5; i > 0; i--) {
+    #ifdef VERBOSE
+        for(int i = 2; i > 0; i--) {
             Serial.println(String::format("Starting measurement in %d", i));
             delay(1000);
         }
     #endif
     for(int attempts = 0; attempts < maxMeasurementAttempts; attempts++) {
-        #ifdef DEBUG1
+        #ifdef VERBOSE
             Serial.println("------------------");
             Serial.println(String::format("MEASUREMENT ATTEMPT %d", attempts+1));
         #endif
-
-        recordSamples();
         
         #ifdef MEASUREFLASH
             led.on();
@@ -118,35 +108,46 @@ void Sensors::refreshAll() {
             break;
         }
     }
-
-    calculatePower();
-
     
-    #ifdef DEBUG2
-        Serial.println("---------FINAL ERROR---------");
-        Serial.println(String::format("Voltage Error - %f", input[0].error));
-        Serial.println(String::format("Current 1 Error - %f", input[0].error));
-        Serial.println(String::format("Current 2 Error - %f", input[0].error));
-        Serial.println(String::format("Current 3 Error - %f", input[0].error));
-        Serial.println("---------FINAL VALUES---------");
-    #endif
-
     if(measurementsValid) {
+        #ifndef IGNOREPOWER
+            calculatePower();
+        #endif
+
+        #ifdef SHOWSTEPS
+            Serial.println("---------FINAL ERROR---------");
+            Serial.println(String::format("Voltage Error - %f", input[0].error));
+            Serial.println(String::format("Current 1 Error - %f", input[1].error));
+            Serial.println(String::format("Current 2 Error - %f", input[2].error));
+            Serial.println(String::format("Current 3 Error - %f", input[3].error));
+            Serial.println("---------FINAL VALUES---------");
+            Serial.println(String::format("Voltage RMS: %f", input[0].rms));
+            Serial.println(String::format("Period: %d", period));
+            Serial.println(String::format("Current 1 RMS: %f", input[1].rms));
+            Serial.println(String::format("Current 2 RMS: %f", input[2].rms));
+            Serial.println(String::format("Current 3 RMS: %f", input[3].rms));
+            #ifndef IGNOREPOWER
+                Serial.println(String::format("Power: %f", power));
+            #endif
+        #endif
+
         voltage = input[0].rms*compressionMultiplier;
-        frequency = input[0].frequency*compressionMultiplier;
+        frequency = d_frequency*compressionMultiplier;
         current_1 = input[1].rms*compressionMultiplier;
         current_2 = input[2].rms*compressionMultiplier;
         current_3 = input[3].rms*compressionMultiplier;
         power = power*compressionMultiplier;
 
-        #ifdef DEBUG1
-            Serial.println("\n---------FINAL OUTPUT---------");
+        #ifdef VERBOSE
+            Serial.println("---------FINAL OUTPUT---------");
             Serial.println(String::format("Voltage RMS: %f", (double)voltage/(double)compressionMultiplier));
             Serial.println(String::format("Frequency: %f", (double)frequency/(double)compressionMultiplier));
             Serial.println(String::format("Current 1 RMS: %f", (double)current_1/(double)compressionMultiplier));
             Serial.println(String::format("Current 2 RMS: %f", (double)current_2/(double)compressionMultiplier));
             Serial.println(String::format("Current 3 RMS: %f", (double)current_3/(double)compressionMultiplier));
-            Serial.println(String::format("Power: %f", (double)power/(double)compressionMultiplier));
+            #ifndef IGNOREPOWER
+                Serial.println(String::format("Power: %f", (double)power/(double)compressionMultiplier));
+            #endif
             Serial.println("------------------\n");
         #endif
 
@@ -156,7 +157,12 @@ void Sensors::refreshAll() {
         current_1 = invalidPlaceholder;
         current_2 = invalidPlaceholder;
         current_3 = invalidPlaceholder;
-        power = invalidPlaceholder;
+        #ifndef IGNOREPOWER
+            power = invalidPlaceholder;
+        #endif
+        #ifdef VERBOSE
+            Serial.println("---------MEASUREMENT FAILED---------");
+        #endif
     }
 }
 
@@ -169,7 +175,7 @@ void Sensors::refreshAll() {
 
   void Sensors::fieldTest() {
     while(true) {
-      refreshAll();
+        refreshAll();
     }
   }
 
@@ -201,11 +207,11 @@ void Sensors::refreshAll() {
     return (unsigned short)power;
   }
 
-  double Sensors::waveError(int measurementIndex, int iterator, int xShift, int amplitude, int period) {
-    return pow((samples[measurementIndex][iterator] - simulateWave(input[measurementIndex].yShift, input[measurementIndex].rectified, xShift, amplitude, iterator, period)), 2);
+  double Sensors::waveError(int measurementIndex, int iterator, int xShift, int amplitude) {
+    return pow((samples[measurementIndex][iterator] - simulateWave(input[measurementIndex].yShift, input[measurementIndex].rectified, xShift, amplitude, iterator)), 2);
   }
 
-  double Sensors::simulateWave(int yShift, bool rectified, int xShift, int amplitude, int iterator, int period) {
+  double Sensors::simulateWave(int yShift, bool rectified, int xShift, int amplitude, int iterator) {
     if(rectified) {
       return ((double)yShift + ((double)amplitude/(double)100) * fabs(cos( 2.0 * pi *  (((double)xShift/(double)xShiftRangeMax) + (((double)iterator*measurementDuration) / (double)period)))));
     } else {
@@ -215,7 +221,7 @@ void Sensors::refreshAll() {
 
   void Sensors::recordSamples() {
 // Record samples and sampling time
-#ifndef DEBUG4
+#ifndef GENERATESAMPLES
     int sampleTime = -micros();
     for(unsigned int i = 0; i < measurement_samples; i++) {
       for(unsigned int j = 0; j < input_count; j++) {
@@ -228,16 +234,16 @@ void Sensors::refreshAll() {
     measurementDuration = 160;
     srand(micros() % 1000000);
     for(int a = 0; a < 2; a++) { // The first iteration is to calibrate measurementDuration
-        int p = 18000 + rand() % 4000; // Random period 18000-22000
+        period = 18000 + rand() % 4000; // Random period 18000-22000
         if(a > 0) {
             Serial.println("------------------");
             Serial.println("Generated Samples");
             Serial.println("------------------");
-            Serial.println(String::format("Period: %d", p));
+            Serial.println(String::format("Period: %d", period));
         }
         for(unsigned int i = 0; i < input_count; i++) {
           input[i].xShift = rand() % (periodRangeMax / 2);
-          input[i].amplitude = 20 + rand() % amplitudeRangeMax;
+          input[i].amplitude = 120000;//20 + rand() % amplitudeRangeMax;
           if(a > 0) {
             Serial.println(String::format("%d - xShift: %d", i, input[i].xShift));
             Serial.println(String::format("%d - amplitude: %d", i, input[i].amplitude));
@@ -250,7 +256,7 @@ void Sensors::refreshAll() {
         int sampleTime = -micros();
         for(unsigned int i = 0; i < measurement_samples; i++) {
           for(unsigned int j = 0; j < input_count; j++) {
-            samples[j][i] = simulateWave(input[j].yShift, input[j].rectified, input[j].xShift, input[j].amplitude, i, p);
+            samples[j][i] = simulateWave(input[j].yShift, input[j].rectified, input[j].xShift, input[j].amplitude, i);
           }
         }
         if(a < 1) {
@@ -260,13 +266,14 @@ void Sensors::refreshAll() {
     }
 
 #endif
-  #ifdef DEBUG1
-            Serial.println("Samples recorded");
-        #endif
+#ifdef VERBOSE
+    Serial.println("------------------");
+    Serial.println("Samples recorded");
+#endif
 }
 
 void Sensors::analyzeSmoothedWaves() {
-    #ifdef DEBUG2
+    #ifdef SHOWSTEPS
     Serial.println("------------------");
     #endif
     for(unsigned int index = 0; index < input_count; index++) {
@@ -289,12 +296,12 @@ void Sensors::analyzeSmoothedWaves() {
                 }
             }
             input[index].amplitude = input[index].rectified ? 100*(max-min) : 50*(max-min);
-            #ifdef DEBUG2
+            #ifdef SHOWSTEPS
                 Serial.println(String::format("%d - Preliminary amplitude: %d", index, input[index].amplitude));
             #endif
         }
     }
-    #ifdef DEBUG1
+    #ifdef VERBOSE
         Serial.println("------------------");
         Serial.println("Preliminary analysis complete");
     #endif
@@ -303,25 +310,28 @@ void Sensors::analyzeSmoothedWaves() {
 }
 
 void Sensors::bruteforceFrequencies() {
-    #ifdef DEBUG2
+    #ifdef SHOWSTEPS
         Serial.println("------------------");
     #endif
     
+    bool foundPeriod = false;
+    period = 0;
     for(unsigned int index = 0; index < input_count; index++) {
+        int bestPeriod = 0;
         if(!input[index].ignore) {
             double error;
             double lowestError = -1;
             int xShift = 0;
-            int period = 0;
             int iterator;
             int sampleCap = measurement_samples;
+
             for(int periodRound = 0; periodRound < 3; periodRound++) {
                 if(periodRound == 1) {
                     sampleCap = period / measurementDuration;
                 } else if(periodRound == 2) {
                     sampleCap = measurement_samples;
+                    foundPeriod = false;
                 }
-                bool foundPeriod = false;
                 bool foundxShift = false;
                 lowestError = -1;
 
@@ -332,7 +342,7 @@ void Sensors::bruteforceFrequencies() {
 
                 while(!foundPeriod || !foundxShift) {
                 // Recalculate period
-                    if(index == 0 && periodRound != 1) {
+                    if(periodRound != 1 && !foundPeriod) {
                         iterator = (periodMax-periodMin) / regression_n;
                         if(iterator < 1) {
                             foundPeriod = true;
@@ -340,34 +350,31 @@ void Sensors::bruteforceFrequencies() {
                         }
 
                         for(int i = periodMin; i < periodMax; i+= iterator) {
-                            #ifdef DEBUG3
+                            #ifdef SHOWREGRESSION
                                 Serial.println(String::format("%d - Trying period %d, xShift %d", index, i, xShift));
                             #endif
+                            period = i;
                             error = 0;
                             for(int j = 0; j < sampleCap; j++) {
                                 if(samples[index][j] > input[index].waveMin && samples[index][j] < input[index].waveMax) {
-                                    error += waveError(index, j, xShift, input[index].amplitude, i);
+                                    error += waveError(index, j, xShift, input[index].amplitude);
                                 }
                             }
                             error = sqrt(error);
-                            #ifdef DEBUG3
+                            #ifdef SHOWREGRESSION
                                 Serial.println(String::format("%d - Error %f", index, error));
                             #endif
                             if(error < lowestError || lowestError < 0) {
                                 lowestError = error;
-                                period = i;
+                                bestPeriod = i;
                             }
                         }
+                        period = bestPeriod;
                         periodMin = period - iterator;
                         periodMax = period + iterator;
-                        #ifdef DEBUG3
+                        #ifdef SHOWREGRESSION
                             Serial.println(String::format("%d - Period - %d", index, period));
                         #endif
-                    } else if(index != 0) {
-                        period = input[0].period;
-                        foundPeriod = true;
-                    } else {
-                        foundPeriod = true;
                     }
                     if(periodRound != 2) {
                         // Recalculate xShift
@@ -377,17 +384,17 @@ void Sensors::bruteforceFrequencies() {
                             iterator = 1;
                         }
                         for(int i = xShiftMin; i < xShiftMax; i+= iterator) {
-                            #ifdef DEBUG3
+                            #ifdef SHOWREGRESSION
                                 Serial.println(String::format("%d - Trying period %d, xShift %d", index, period, i));
                             #endif
                             error = 0;
                             for(int j = 0; j < sampleCap; j++) {
                                 if(samples[index][j] > input[index].waveMin && samples[index][j] < input[index].waveMax) {
-                                    error += waveError(index, j, i, input[index].amplitude, period);
+                                    error += waveError(index, j, i, input[index].amplitude);
                                 }
                             }
                             error = sqrt(error);
-                            #ifdef DEBUG3
+                            #ifdef SHOWREGRESSION
                                 Serial.println(String::format("%d - Error %f", index, error));
                             #endif
                             if(error < lowestError || lowestError < 0) {
@@ -397,39 +404,39 @@ void Sensors::bruteforceFrequencies() {
                         }
                         xShiftMax = xShift + iterator;
                         xShiftMin = xShift - iterator;
-                        #ifdef DEBUG3
+                        #ifdef SHOWREGRESSION
                             Serial.println(String::format("%d - xShift - %d", index, xShift));
                         #endif
                     } else {
                       foundxShift = true;
                     }
                 }
-                if(index != 0) {
+                #ifdef SHOWSTEPS
+                    if(periodRound == 2) {
+                        Serial.println(String::format("Period: %d", period));
+                    }
+                #endif
+                if(periodRound == 0 && bestPeriod == 0) {
                     break;
                 }
             }
             input[index].error = lowestError;
-            #ifdef DEBUG2
+            #ifdef SHOWSTEPS
                 Serial.println(String::format("1.%d xShift: %d", index, xShift));
-                Serial.println(String::format("1.%d period: %d", index, period));
                 Serial.println(String::format("1.%d error: %f", index, input[index].error));
             #endif
             input[index].xShift = xShift;
-            input[index].period = period;
-
-            if(input[index].period < 15002) {
-                input[index].frequency = 0;
-            } else {
-                input[index].frequency = (((double)1000 * (double)1000. / (double)input[index].period));
-                input[index].frequency = evaluatePolynomial(input[index].fa, input[index].fb, input[index].fc, (double)input[index].frequency);
-            }
         } else {
             input[index].xShift = invalidPlaceholder;
-            input[index].period = invalidPlaceholder;
-            input[index].frequency = invalidPlaceholder;
         }
+        if(period < 15002) {
+            d_frequency = 0;
+        } else {
+            d_frequency = (((double)1000 * (double)1000. / (double)period));
+        }
+        
     }
-    #ifdef DEBUG1
+    #ifdef VERBOSE
         Serial.println("------------------");
         Serial.println("Frequency analysis complete");
     #endif
@@ -438,7 +445,7 @@ void Sensors::bruteforceFrequencies() {
 }
 
 void Sensors::bruteforceAmplitudes() {
-    #ifdef DEBUG2
+    #ifdef SHOWSTEPS
         Serial.println("------------------");
     #endif
 
@@ -464,17 +471,17 @@ void Sensors::bruteforceAmplitudes() {
                   iterator = 100;
                 }
                 for(int i = amplitudeMin; i < amplitudeMax; i+= iterator) {
-                    #ifdef DEBUG3
+                    #ifdef SHOWREGRESSION
                         Serial.println(String::format("%d - Trying amplitude %d", index, i));
                     #endif
                     error = 0;
                     for(unsigned int j = 0; j < measurement_samples; j++) {
                         if(samples[index][j] > input[index].waveMin && samples[index][j] < input[index].waveMax) {
-                            error += waveError(index, j, input[index].xShift, i, input[index].period);
+                            error += waveError(index, j, input[index].xShift, i);
                         }
                     }
                     error = sqrt(error);
-                    #ifdef DEBUG3
+                    #ifdef SHOWREGRESSION
                         Serial.println(String::format("%d - Error %f", index, error));
                     #endif
                     if(error < lowestError || lowestError < 0) {
@@ -491,21 +498,20 @@ void Sensors::bruteforceAmplitudes() {
             }
             input[index].rms = evaluatePolynomial(input[index].a, input[index].b, input[index].c, (double)input[index].amplitude);
 
-            if(input[index].error > maxError) {
+            if(input[index].error > input[index].maxError) {
                 measurementsValid = false;
-                #ifdef DEBUG2
+                #ifdef SHOWSTEPS
                     Serial.println(String::format("2.%d amplitude: %d", index, input[index].amplitude));
                     Serial.println(String::format("2.%d error: %f", index, input[index].error));
                 #endif
-                #ifdef DEBUG1
+                #ifdef VERBOSE
                     Serial.println("------------------");
                     Serial.println("ATTEMPT FAILED");
-                    printWaves(0, false);
-                    delay(200000);
+                    tmp += input[index].error;
                 #endif
-            return;
+                return;
             }
-            #ifdef DEBUG2
+            #ifdef SHOWSTEPS
                 Serial.println(String::format("2.%d amplitude: %d", index, input[index].amplitude));
                 Serial.println(String::format("2.%d error: %f", index, input[index].error));
             #endif
@@ -514,7 +520,7 @@ void Sensors::bruteforceAmplitudes() {
             input[index].error = 0;
         }
     }
-    #ifdef DEBUG1
+    #ifdef VERBOSE
         Serial.println("------------------");
         Serial.println("Wave analysis complete");
     #endif
@@ -532,7 +538,7 @@ bool Sensors::checkStatus() {
 }
 
 void Sensors::calculatePower() {
-    #ifdef DEBUG2
+    #ifdef SHOWSTEPS
         Serial.println("------------------");
     #endif
     int currentxShift;
@@ -558,7 +564,7 @@ void Sensors::calculatePower() {
         }
     }
     Serial.println(String::format("Total Power: %f", power));
-    #ifdef DEBUG1
+    #ifdef VERBOSE
         Serial.println("------------------");
         Serial.println("Power calculations complete");
     #endif
@@ -567,12 +573,10 @@ void Sensors::calculatePower() {
 void Sensors::zeroMeasurements() {
     for(int i = 0; i < 4; i++) {
         if(!input[i].ignore) {
-            input[i].frequency = 0;
             input[i].rms = 0;
             input[i].amplitude = 0;
             input[i].error = 0;
         } else {
-            input[i].frequency = invalidPlaceholder;
             input[i].rms = invalidPlaceholder;
             input[i].amplitude = invalidPlaceholder;
             input[i].error = 0;
@@ -581,6 +585,8 @@ void Sensors::zeroMeasurements() {
     inputActive = false;
     measurementsValid = true;
     power = 0;
+    d_frequency = 0;
+    period = invalidPlaceholder;
 }
 
 void Sensors::printWaves(int index, bool simulated) {
@@ -589,7 +595,7 @@ void Sensors::printWaves(int index, bool simulated) {
     }
     if(simulated) {
         for(unsigned int i = 0; i < measurement_samples; i++) {
-            Serial.println(String::format("%d, %f", i*(int)measurementDuration, simulateWave(input[index].yShift, input[index].rectified, input[index].xShift, input[index].amplitude, i, input[index].period)));
+            Serial.println(String::format("%d, %f", i*(int)measurementDuration, simulateWave(input[index].yShift, input[index].rectified, input[index].xShift, input[index].amplitude, i)));
         }
     }
 }
