@@ -21,6 +21,7 @@
 
 #define STATUS_CHANGE
 #define MEASURE
+#define TEST
 
 //set system mode
 SYSTEM_MODE(SEMI_AUTOMATIC);
